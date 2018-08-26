@@ -24,9 +24,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    Camera/camera.cpp \
+    Network/network.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    Camera/camera.h \
+    config.h
 
 FORMS    += mainwindow.ui
 
