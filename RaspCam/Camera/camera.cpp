@@ -37,6 +37,14 @@ bool Camera::initCamera(unsigned int width, unsigned int height)
     return true;
 }
 
+void Camera::close()
+{
+    if(this->cam.isOpened())
+    {
+        this->cam.release();
+    }
+}
+
 bool Camera::isEnable()
 {
     return this->cam.isOpened();
@@ -84,6 +92,10 @@ void Camera::run()
 
         msleep(this->pollingPeriod);
     }
+
+    qDebug() << "release camera resource..";
+
+    this->close();
 }
 
 void Camera::exit()

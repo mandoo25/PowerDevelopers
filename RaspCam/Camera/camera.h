@@ -36,6 +36,7 @@ private:
     QMutex mutex;
 
     void updateImg(cv::Mat img);
+    void close();
 
 
 signals:
