@@ -65,6 +65,13 @@ namespace EfficientApp
         err = 2
     }
 
+    enum PacketReturn
+    {
+        ok = 0,
+        ng = 1,
+        cont = 2
+    }
+
 
       /// <summary>
       /// Summary description for Form1.
@@ -73,7 +80,7 @@ namespace EfficientApp
     {
         public class Constants
         {
-            public const int ReqCmdPckSize = 6;
+            public const int ReqCmdPckSize = 11;
 
             public const int order1stClassLength = 8;
             public const int order2ndClassLength = 2;
@@ -91,8 +98,10 @@ namespace EfficientApp
             public byte cell_number;
             public byte process_number;
             public byte accracy;
-            public byte data_size;
-            public String data;
+            public byte order_size;
+            public String order_str;
+            public int image_size;
+            public byte[] image;
             public String product_str;
             public String serial_str;
             public String cur_date;
@@ -105,32 +114,67 @@ namespace EfficientApp
             {
                 if (size < Constants.ReqCmdPckSize)
                 {
-                    return -1;
+                    return (int)PacketReturn.ng;
                 }
 
-                this.cmd_type = buf[0];
-                this.action_type = buf[1];
-                this.item_id = buf[2];
-                this.cell_number = buf[3];
-                this.process_number = buf[4];
-                this.accracy = buf[5];
-                this.data_size = buf[6];
+                int i = 0;
 
-                if (this.data_size > 0)
+                this.cmd_type = buf[i++];
+                if (this.cmd_type != (byte)CmdType.CMD_TYPE_REQUEST)
                 {
-                    byte[] bytes = new byte[this.data_size];
-                    System.Buffer.BlockCopy(buf, 7, bytes, 0, this.data_size);
-                    this.data = Encoding.ASCII.GetString(bytes, 0, this.data_size);
+                    return (int)PacketReturn.ng;
+                }
+
+                this.action_type = buf[i++];
+                this.item_id = buf[i++];
+                this.cell_number = buf[i++];
+                this.process_number = buf[i++];
+                this.accracy = buf[i++];
+                this.order_size = buf[i++];
+
+                if (this.order_size > 0)
+                {
+                    if((this.order_size+i) > (size-4))
+                    {
+                        return (int)PacketReturn.ng;
+                    }
+                    
+                    byte[] tmp_order_str = new byte[this.order_size];
+                    System.Buffer.BlockCopy(buf, i, tmp_order_str, 0, this.order_size);
+                    this.order_str = Encoding.ASCII.GetString(tmp_order_str, 0, this.order_size);
+                    i = i + this.order_size;
 
                     OrderContents orderCont = new OrderContents();
-                    if (orderCont.analysis(this.data) == 0)
+                    if (orderCont.analysis(this.order_str) == 0)
                     {
                         this.product_str = orderCont.first_class + orderCont.second_class;
                         this.serial_str = orderCont.SerialNum;
                     }
+                    else
+                    {
+                        return (int)PacketReturn.ng;
+                    }
                 }
-                
-                return 0;
+                else if (this.item_id != (byte)WorkItems.order)
+                {
+                    return (int)PacketReturn.ng;
+                }
+
+                this.image_size = BitConverter.ToInt32(buf, i);
+                i = i + 4;
+
+                if (this.image_size > 0)
+                {
+                    if (this.image_size + i > size)
+                    {
+                        return (int)PacketReturn.cont;
+                    }
+
+                    this.image = new byte[this.image_size];
+                    System.Buffer.BlockCopy(buf, i, this.image, 0, this.image_size);
+                }
+
+                return (int)PacketReturn.ok;
             }
         }
 
@@ -1013,62 +1057,90 @@ namespace EfficientApp
                 _streams.Add(netStream);
                 try
                 {
-                    byte[] receiveBuffer = new byte[512];                    
+                    byte[] receiveBuffer = new byte[1024*500];                    
                     int bytesReceived;
-                    while ((bytesReceived = netStream.Read(receiveBuffer, 0, receiveBuffer.Length)) > 0)
-                    {                    
-                        UpdateGUI(Encoding.ASCII.GetString(receiveBuffer, 0, bytesReceived));                        
+                    int totalReceivedBytes = 0;
+
+                    while ((bytesReceived = netStream.Read(receiveBuffer, totalReceivedBytes, (receiveBuffer.Length - totalReceivedBytes))) > 0)
+                    {
+                        //UpdateGUI(Encoding.ASCII.GetString(receiveBuffer, 0, bytesReceived));
+                        totalReceivedBytes = totalReceivedBytes + bytesReceived;
                     
                         ReqCmd reqCmd = new ReqCmd();
                         RespAck respAck = new RespAck();
 
-                        reqCmd.analysis_packet(receiveBuffer, bytesReceived);
-                        reqCmd.cur_date = DateTime.Today.ToString("yyyy-MM-dd");
-                        reqCmd.start_time = DateTime.Now.ToString("HH_mm_ss_fff");
-                        stopWatch.Start();
-
-                        print_log((byte)LogType.info, string.Format("[Received Data] {0:X2} {1:X2} {2:X2} {3:X2} {4:X2} {5:X2} {6:X2} ",
-                            reqCmd.cmd_type, reqCmd.action_type, reqCmd.item_id, reqCmd.cell_number, reqCmd.process_number, reqCmd.accracy, reqCmd.data_size) + reqCmd.data);
-                        //MessageBox.Show(reqCmd.data);
-                        print_log((byte)LogType.info, "Product : " + reqCmd.product_str);
-                        print_log((byte)LogType.info, "Serial Num : " + reqCmd.serial_str);
-
-                        lock (_CogLock)
+                        rtn = reqCmd.analysis_packet(receiveBuffer, totalReceivedBytes);
+                        if(rtn == (int)PacketReturn.cont)
                         {
-                            switch (reqCmd.cmd_type)
-                            {
-                                case (byte)CmdType.CMD_TYPE_REQUEST:
-                                {
-                                    //MessageBox.Show("cmd_type_request");
-                                    //DoCogSequence(rtn);
-                                    switch (reqCmd.action_type)
-                                    {
-                                        case (byte)ActionType.barcode1d:
-                                            myJob = myJobManager.Job("Barcode_1D");
-                                            respAck = CogActBarcode(ref reqCmd);
-                                            break;
-
-                                        case (byte)ActionType.barcode2d:
-                                            myJob = myJobManager.Job("Barcode_2D");
-                                            respAck = CogActBarcode(ref reqCmd);
-                                            break;                                        
-
-                                        default:
-                                            break;
-                                    }
-                                    break;
-                                }
-                                default:
-
-                                    break;
-                            }
+                            continue;
                         }
+                        totalReceivedBytes = 0;
 
-                        reqCmd.end_time = DateTime.Now.ToString("HH_mm_ss_fff");
-                        stopWatch.Stop();
-                        reqCmd.due_msec = stopWatch.ElapsedMilliseconds;
-                        UpdateGUI("Sleep ends" + stopWatch.ElapsedMilliseconds);
-                        stopWatch.Reset();
+                        if (rtn == (int)PacketReturn.ok)
+                        {
+                            reqCmd.cur_date = DateTime.Today.ToString("yyyy-MM-dd");
+                            reqCmd.start_time = DateTime.Now.ToString("HH_mm_ss_fff");
+                            stopWatch.Start();
+
+                            print_log((byte)LogType.info, string.Format("[Received Data] {0:X} {1:X} {2:X} {3:X} {4:X} {5:X} {6:X} ",
+                                reqCmd.cmd_type, reqCmd.action_type, reqCmd.item_id, reqCmd.cell_number, reqCmd.process_number, reqCmd.accracy, reqCmd.order_size) + reqCmd.order_str + string.Format("{0}", reqCmd.image_size));
+                            //MessageBox.Show(reqCmd.data);
+                            print_log((byte)LogType.info, "Product : " + reqCmd.product_str);
+                            print_log((byte)LogType.info, "Serial Num : " + reqCmd.serial_str);
+
+
+                            lock (_CogLock)
+                            {
+                                if (reqCmd.image_size != 0 && reqCmd.image != null)
+                                {
+                                    File.WriteAllBytes("test.jpg", reqCmd.image);
+                                }
+
+                                switch (reqCmd.cmd_type)
+                                {
+                                    case (byte)CmdType.CMD_TYPE_REQUEST:
+                                        {
+                                            //MessageBox.Show("cmd_type_request");
+                                            //DoCogSequence(rtn);
+                                            switch (reqCmd.action_type)
+                                            {
+                                                case (byte)ActionType.barcode1d:
+                                                    myJob = myJobManager.Job("Barcode_1D");
+                                                    respAck = CogActBarcode(ref reqCmd);
+                                                    break;
+
+                                                case (byte)ActionType.barcode2d:
+                                                    myJob = myJobManager.Job("Barcode_2D");
+                                                    respAck = CogActBarcode(ref reqCmd);
+                                                    break;
+
+                                                default:
+                                                    break;
+                                            }
+                                            break;
+                                        }
+                                    default:
+
+                                        break;
+                                }
+                            }
+                       
+
+                            reqCmd.end_time = DateTime.Now.ToString("HH_mm_ss_fff");
+                            stopWatch.Stop();
+                            reqCmd.due_msec = stopWatch.ElapsedMilliseconds;
+                            UpdateGUI("Sleep ends" + stopWatch.ElapsedMilliseconds);
+                            stopWatch.Reset();
+
+                        }
+                        else
+                        {
+                            respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                            respAck.action_type = reqCmd.action_type;
+                            respAck.item_id = reqCmd.item_id;
+                            respAck.cell_number = reqCmd.cell_number;
+                            respAck.process_number = reqCmd.process_number;
+                        }
 
                         if (netStream.CanWrite && respAck.cmd_type != 0)
                         {
