@@ -211,7 +211,12 @@ namespace EfficientApp
         }
                
 
-        String refDirectory = @"D:\Source\VisionPro_Test\images\";
+        String refDirectory = Application.StartupPath;
+        String verificationDirectory = Application.StartupPath + @"\images\verification\";
+        String backupDirectory = Application.StartupPath + @"\images\backup\";
+        String verificationFile = "verification.jpg";
+        String vppFilePath = @"D:\Source\VisionPro_Test\FrontCover.vpp";
+        String logBackupPath = Application.StartupPath + @"\LOG";
         private StreamWriter _write;
         private FileStream _fs;
         MySqlConnection mySqlConn;
@@ -275,7 +280,7 @@ namespace EfficientApp
             //
             InitializeComponent();
             InitializeJobManager();
-            InitializeDataBase();
+            
             IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
             foreach(IPAddress ip in host.AddressList)
             {
@@ -627,7 +632,7 @@ namespace EfficientApp
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(288, 21);
             this.textBox1.TabIndex = 0;
-            this.textBox1.Text = "D:\\Source\\VisionPro_Test\\images\\Log";
+            this.textBox1.Text = logBackupPath;
             // 
             // Form1
             // 
@@ -668,12 +673,14 @@ namespace EfficientApp
 
         private void Form1_Closing(object sender, CancelEventArgs e)
         {
-            myJobManager.UserResultAvailable -= new CogJobManager.CogUserResultAvailableEventHandler(myJobManager_UserResultAvailable);
-            cogRecordDisplay1.Dispose();
-            // Be sure to shudown the CogJobManager!!
-            myJobManager.Shutdown();
-
-            mySqlConn.Close();
+            if (ListenButton.Text != "Listen")
+            {
+                myJobManager.UserResultAvailable -= new CogJobManager.CogUserResultAvailableEventHandler(myJobManager_UserResultAvailable);
+                cogRecordDisplay1.Dispose();
+                // Be sure to shudown the CogJobManager!!
+                myJobManager.Shutdown();
+                mySqlConn.Close();
+            }            
         }      
 
         
@@ -682,7 +689,8 @@ namespace EfficientApp
             try
             {
                 ListenButton.Text = "Stop";
-            
+
+                InitializeDataBase();
                 // There is only one connection thread that is used to connect clients.
                 _connectionThread = new System.Threading.Thread(new ThreadStart(ConnectToClient));
                 _connectionThread.IsBackground = true;
@@ -740,6 +748,7 @@ namespace EfficientApp
             myJobManager.UserResultAvailable -= new CogJobManager.CogUserResultAvailableEventHandler(myJobManager_UserResultAvailable);        
             // Be sure to shudown the CogJobManager!!
             myJobManager.Shutdown();
+            mySqlConn.Close();
         }
 
         private void ConnectToClient()
@@ -791,9 +800,10 @@ namespace EfficientApp
             }
         }
 
-        public void backupImages(ref ReqCmd reqCmd, string serial_num, string saveFileName, bool result)
+        public void backupImages(ref ReqCmd reqCmd, string serial_num, bool result)
         {
-            string saveFilePath = refDirectory + "backup\\" + reqCmd.cur_date + "\\";
+            string saveFilePath = backupDirectory + reqCmd.cur_date + "\\";
+            string saveFileName = string.Format("item{0}.jpg", reqCmd.item_id);
             //DateTime now = DateTime.Now;
 
             if (serial_num != null) saveFilePath = saveFilePath + serial_num + "\\";
@@ -835,7 +845,7 @@ namespace EfficientApp
 
             cogRecordDisplay1.CreateContentBitmap(CogDisplayContentBitmapConstants.Image).Save(strFileTmp, System.Drawing.Imaging.ImageFormat.Jpeg);
             reqCmd.saveFilePath = strFileTmp;
-            print_log((byte)LogType.info, "File Saved at strFileTmp");
+            print_log((byte)LogType.info, "File Saved at " + strFileTmp);
             UpdateGUI("save " + saveFileName);  
         }
 
@@ -850,8 +860,10 @@ namespace EfficientApp
                 CogToolGroup myTG = myJob.VisionTool as CogToolGroup;
                 CogImageFileTool myIFTool = myTG.Tools["CogImageFileTool1"] as CogImageFileTool;
 
-                string openFilePath = refDirectory + string.Format("verification\\cell{0}\\main{1}\\", reqCmd.cell_number, reqCmd.process_number);
-                string openFileName = Enum.GetName(typeof(ActionType), reqCmd.action_type) + "_" + Enum.GetName(typeof(WorkItems), reqCmd.item_id) + ".jpg";
+                //string openFilePath = refDirectory + string.Format("verification\\cell{0}\\main{1}\\", reqCmd.cell_number, reqCmd.process_number);
+                string openFilePath = verificationDirectory;
+                //string openFileName = Enum.GetName(typeof(ActionType), reqCmd.action_type) + "_" + Enum.GetName(typeof(WorkItems), reqCmd.item_id) + ".jpg";
+                string openFileName = verificationFile;
 
                 //MessageBox.Show(openFilePath + openFileName);
                 myIFTool.Operator.Open(openFilePath + openFileName, CogImageFileModeConstants.Read);
@@ -897,7 +909,7 @@ namespace EfficientApp
                             respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                             print_log((byte)LogType.info, string.Format("orderCont.SerialNum NULL"));
                         }
-                        backupImages(ref reqCmd, orderCont.SerialNum, openFileName, true);
+                        backupImages(ref reqCmd, orderCont.SerialNum, true);
                         //if(orderCont.SerialNum != null) saveFilePath = saveFilePath + orderCont.SerialNum + "\\";
                     }
                     else
@@ -907,7 +919,7 @@ namespace EfficientApp
                             respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                             print_log((byte)LogType.info, string.Format("reqCmd.serial_str"));
                         }
-                        backupImages(ref reqCmd, reqCmd.serial_str, openFileName, true);
+                        backupImages(ref reqCmd, reqCmd.serial_str, true);
                         //if (reqCmd.serial_str != null) saveFilePath = saveFilePath + reqCmd.serial_str + "\\";
                     }                   
                 }
@@ -915,7 +927,7 @@ namespace EfficientApp
                 {
                     respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                     print_log((byte)LogType.info, string.Format("myIDTool.Results.Count : {0}", myIDTool.Results.Count));
-                    backupImages(ref reqCmd, null, openFileName, false);
+                    backupImages(ref reqCmd, null, false);
                 }
 
                 while(myJob.State != CogJobStateConstants.Stopped)
@@ -950,8 +962,10 @@ namespace EfficientApp
                 CogToolGroup myTG = myJob.VisionTool as CogToolGroup;
                 CogImageFileTool myIFTool = myTG.Tools["CogImageFileTool1"] as CogImageFileTool;
 
-                string openFilePath = refDirectory + string.Format("verification\\cell{0}\\main{1}\\", reqCmd.cell_number, reqCmd.process_number);
-                string openFileName = Enum.GetName(typeof(ActionType), reqCmd.action_type) + "_" + Enum.GetName(typeof(WorkItems), reqCmd.item_id) + ".jpg";
+                //string openFilePath = refDirectory + string.Format("verification\\cell{0}\\main{1}\\", reqCmd.cell_number, reqCmd.process_number);
+                //string openFileName = Enum.GetName(typeof(ActionType), reqCmd.action_type) + "_" + Enum.GetName(typeof(WorkItems), reqCmd.item_id) + ".jpg";
+                string openFilePath = verificationDirectory;
+                string openFileName = verificationFile;
 
                 //MessageBox.Show(openFilePath + openFileName);
                 myIFTool.Operator.Open(openFilePath + openFileName, CogImageFileModeConstants.Read);
@@ -992,12 +1006,12 @@ namespace EfficientApp
                     {
                         OrderContents orderCont = new OrderContents();
                         orderCont.analysis(resultId);
-                        backupImages(ref reqCmd, orderCont.SerialNum, openFileName, true);
+                        backupImages(ref reqCmd, orderCont.SerialNum, true);
                         //if(orderCont.SerialNum != null) saveFilePath = saveFilePath + orderCont.SerialNum + "\\";
                     }
                     else
                     {
-                        backupImages(ref reqCmd, reqCmd.serial_str, openFileName, true);
+                        backupImages(ref reqCmd, reqCmd.serial_str, true);
                         //if (reqCmd.serial_str != null) saveFilePath = saveFilePath + reqCmd.serial_str + "\\";
                     }
                 }
@@ -1005,7 +1019,7 @@ namespace EfficientApp
                 {
                     respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                     print_log((byte)LogType.info, string.Format("myIDTool.Results.Count : {0}", myIDTool.Results.Count));
-                    backupImages(ref reqCmd, null, openFileName, false);
+                    backupImages(ref reqCmd, null, false);
                 }
 
                 while (myJob.State != CogJobStateConstants.Stopped)
@@ -1083,7 +1097,7 @@ namespace EfficientApp
                             stopWatch.Start();
 
                             print_log((byte)LogType.info, string.Format("[Received Data] {0:X} {1:X} {2:X} {3:X} {4:X} {5:X} {6:X} ",
-                                reqCmd.cmd_type, reqCmd.action_type, reqCmd.item_id, reqCmd.cell_number, reqCmd.process_number, reqCmd.accracy, reqCmd.order_size) + reqCmd.order_str + string.Format("{0}", reqCmd.image_size));
+                                reqCmd.cmd_type, reqCmd.action_type, reqCmd.item_id, reqCmd.cell_number, reqCmd.process_number, reqCmd.accracy, reqCmd.order_size) + reqCmd.order_str + string.Format(" {0}", reqCmd.image_size));
                             //MessageBox.Show(reqCmd.data);
                             print_log((byte)LogType.info, "Product : " + reqCmd.product_str);
                             print_log((byte)LogType.info, "Serial Num : " + reqCmd.serial_str);
@@ -1093,7 +1107,14 @@ namespace EfficientApp
                             {
                                 if (reqCmd.image_size != 0 && reqCmd.image != null)
                                 {
-                                    File.WriteAllBytes("test.jpg", reqCmd.image);
+                                    DirectoryInfo di = new DirectoryInfo(verificationDirectory);
+
+                                    if (di.Exists == false)
+                                    {
+                                        di.Create();
+                                    }
+
+                                    File.WriteAllBytes(verificationDirectory+verificationFile, reqCmd.image);
                                 }
 
                                 switch (reqCmd.cmd_type)
@@ -1317,7 +1338,7 @@ namespace EfficientApp
                 textBox1.Enabled = false;
                 DirSelect.Enabled = false;
 
-                myJobManager = (CogJobManager)CogSerializer.LoadObjectFromFile("D:\\Source\\VisionPro_Test\\FrontCover.vpp");
+                myJobManager = (CogJobManager)CogSerializer.LoadObjectFromFile(vppFilePath);
 
                 //flush queues
                 myJobManager.UserQueueFlush();
