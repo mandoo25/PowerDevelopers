@@ -57,19 +57,36 @@ void Camera::setPollingPeriod(unsigned int msec)
 
 void Camera::updateImg(Mat img)
 {
-    mutex.lock();
+    captuerImgMutex.lock();
     this->capturedImg = img;
-    mutex.unlock();
+    captuerImgMutex.unlock();
 }
 
 cv::Mat Camera::getCapturedImg()
 {
     Mat img;
-    mutex.lock();
-    img = this->capturedImg;
-    mutex.unlock();
+    // oImg.copyTo(cImg5);
+    captuerImgMutex.lock();
+    img = this->capturedImg.clone();
+    captuerImgMutex.unlock();
 
     return img;
+}
+
+
+
+byte * Camera::getCapturedRawImg()
+{
+    Mat image;
+
+    captuerImgMutex.lock();
+    image = this->capturedImg;
+    int size = image.rows*image.cols;
+    byte bytes[size];
+    std::memcpy(bytes,image.data,size * sizeof(byte));
+    captuerImgMutex.unlock();
+
+    return bytes;
 }
 
 

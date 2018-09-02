@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "Camera/camera.h"
+#include "Network/network.h"
 
 namespace Ui {
 class MainWindow;
@@ -26,9 +27,15 @@ private slots:
 
     void streamImg();
 
+    void getRawImg();
+
 private:
     Ui::MainWindow *ui;
     Camera * camTh;
+    Network * netTh;
+
+signals :
+    void updateRawImgFin();
 };
 
 #endif // MAINWINDOW_H

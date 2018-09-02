@@ -10,6 +10,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "config.h"
+
 using namespace cv;
 
 
@@ -25,6 +27,7 @@ public:
     void setCameraSize(unsigned int width, unsigned int height);
     bool initCamera(unsigned int width, unsigned int height);
     cv::Mat getCapturedImg();
+    byte * getCapturedRawImg();
 
 private:
     unsigned int pollingPeriod;
@@ -33,7 +36,7 @@ private:
     void run();
     raspicam::RaspiCam_Cv cam;
     cv::Mat capturedImg;
-    QMutex mutex;
+    QMutex captuerImgMutex;
 
     void updateImg(cv::Mat img);
     void close();

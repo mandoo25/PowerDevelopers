@@ -30,7 +30,9 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     Camera/camera.h \
-    config.h
+    config.h \
+    Network/network.h \
+    Hardware/Buzzer/buzzer.h
 
 FORMS    += mainwindow.ui
 

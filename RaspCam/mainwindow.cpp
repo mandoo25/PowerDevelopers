@@ -13,9 +13,17 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowFlags(Qt::Popup);
 
     // init camera
-    this->camTh = new Camera(D_CAMERA_POLLING_MSEC, D_CAMERA_DISPLAYED_WIDTH, D_CAMERA_DISPLAYED_HEIGHT);
+    this->camTh = new Camera(D_CAMERA_POLLING_MSEC, D_CAMEARA_CAPTURE_WIDTH, D_CAMEARA_CAPTURE_HEIGHT);
     connect(this->camTh, SIGNAL(captureImg()), this, SLOT(streamImg()));
     this->camTh->start();
+
+
+
+    // init nework
+    this->netTh = new Network(D_NETWORK_SLEEP_MSEC);
+    connect(this->netTh, SIGNAL(updateRawImg()), this, SLOT(getRawImg()));
+    connect(this->netTh, SIGNAL(updateRawImgFin()), this, SLOT(sendRawImgData()));
+
 
     ui->setupUi(this);
 }
@@ -24,6 +32,13 @@ MainWindow::~MainWindow()
 {
     qDebug() << "delete ui";
     delete ui;
+}
+
+void MainWindow::getRawImg()
+{
+    byte * rawImg = this->camTh->getCapturedRawImg();
+    this->netTh->setRawImgData(rawImg);
+    emit updateRawImgFin();
 }
 
 void MainWindow::streamImg()
@@ -41,17 +56,37 @@ void MainWindow::on_exitButton_clicked()
 
 void MainWindow::on_captureButton_clicked()
 {
-    Mat img = this->camTh->getCapturedImg();
-    cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*3/5, D_CAMERA_DISPLAYED_HEIGHT*3/5), 0, 0, CV_INTER_LINEAR);
-    ui->capturedImg1->resize(img.cols, img.rows);
-    ui->capturedImg1->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));
+#define MAX_CAPURES  5
+    static int cnt = 1;
+    static int size[][2] =
+    {
+        {D_CAMERA_DISPLAYED_WIDTH*4/7, D_CAMERA_DISPLAYED_HEIGHT*4/7},
+        {D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11},
+        {D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11},
+        {D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11},
+        {D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11},
+    };
 
-    cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*2/5, D_CAMERA_DISPLAYED_HEIGHT*2/5), 0, 0, CV_INTER_LINEAR);
-    ui->capturedImg2->resize(img.cols, img.rows);
-    ui->capturedImg2->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));
+    static Mat img[MAX_CAPURES];
+    static QLabel * lb[MAX_CAPURES] =
+    {
+        ui->capturedImg1, ui->capturedImg2, ui->capturedImg3, ui->capturedImg4, ui->capturedImg5,
+    };
 
-    cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*1/5, D_CAMERA_DISPLAYED_HEIGHT*1/5), 0, 0, CV_INTER_LINEAR);
-    ui->capturedImg3->resize(img.cols, img.rows);
-    ui->capturedImg3->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));
+    img[0] = this->camTh->getCapturedImg();
+
+    for(int i = 0 ; i < cnt ; i++)
+    {
+        cv::resize(img[i], img[i], Size(size[i][0], size[i][1]), 0, 0, CV_INTER_LINEAR);
+        lb[i]->resize(img[i].cols, img[i].rows);
+        lb[i]->setPixmap(QPixmap::fromImage(QImage(img[i].data, img[i].cols, img[i].rows, img[i].step, QImage::Format_RGB888)));
+    }
+
+    for(int i = MAX_CAPURES - 1; i > 0 ;i--)
+    {
+        img[i] = img[i - 1].clone();
+    }
+
+    if(++cnt > (MAX_CAPURES-1)) cnt = MAX_CAPURES;
 
 }

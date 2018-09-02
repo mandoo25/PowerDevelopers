@@ -52,13 +52,15 @@ SOURCES       = main.cpp \
 		mainwindow.cpp \
 		Camera/camera.cpp \
 		Network/network.cpp moc_mainwindow.cpp \
-		moc_camera.cpp
+		moc_camera.cpp \
+		moc_network.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
 		camera.o \
 		network.o \
 		moc_mainwindow.o \
-		moc_camera.o
+		moc_camera.o \
+		moc_network.o
 DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/unix.conf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/linux.conf \
@@ -121,7 +123,9 @@ DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/lex.prf \
 		RaspCam.pro mainwindow.h \
 		Camera/camera.h \
-		config.h main.cpp \
+		config.h \
+		Network/network.h \
+		Hardware/Buzzer/buzzer.h main.cpp \
 		mainwindow.cpp \
 		Camera/camera.cpp \
 		Network/network.cpp
@@ -279,7 +283,7 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.h Camera/camera.h config.h $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.h Camera/camera.h config.h Network/network.h Hardware/Buzzer/buzzer.h $(DISTDIR)/
 	$(COPY_FILE) --parents main.cpp mainwindow.cpp Camera/camera.cpp Network/network.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents mainwindow.ui $(DISTDIR)/
 
@@ -307,16 +311,24 @@ benchmark: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_mainwindow.cpp moc_camera.cpp
+compiler_moc_header_make_all: moc_mainwindow.cpp moc_camera.cpp moc_network.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_mainwindow.cpp moc_camera.cpp
-moc_mainwindow.cpp: mainwindow.h \
+	-$(DEL_FILE) moc_mainwindow.cpp moc_camera.cpp moc_network.cpp
+moc_mainwindow.cpp: Camera/camera.h \
+		config.h \
+		mainwindow.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
 	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include mainwindow.h -o moc_mainwindow.cpp
 
-moc_camera.cpp: Camera/camera.h \
+moc_camera.cpp: config.h \
+		Camera/camera.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
 	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Camera/camera.h -o moc_camera.cpp
+
+moc_network.cpp: config.h \
+		Network/network.h \
+		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Network/network.h -o moc_network.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -337,19 +349,23 @@ compiler_clean: compiler_moc_header_clean compiler_uic_clean
 
 ####### Compile
 
-main.o: main.cpp mainwindow.h
+main.o: main.cpp mainwindow.h \
+		Camera/camera.h \
+		config.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 mainwindow.o: mainwindow.cpp mainwindow.h \
-		ui_mainwindow.h \
 		Camera/camera.h \
-		config.h
+		config.h \
+		ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o mainwindow.cpp
 
-camera.o: Camera/camera.cpp Camera/camera.h
+camera.o: Camera/camera.cpp Camera/camera.h \
+		config.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o camera.o Camera/camera.cpp
 
-network.o: Network/network.cpp 
+network.o: Network/network.cpp Network/network.h \
+		config.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o network.o Network/network.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
@@ -357,6 +373,9 @@ moc_mainwindow.o: moc_mainwindow.cpp
 
 moc_camera.o: moc_camera.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_camera.o moc_camera.cpp
+
+moc_network.o: moc_network.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_network.o moc_network.cpp
 
 ####### Install
 
