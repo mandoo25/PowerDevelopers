@@ -26,17 +26,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         mainwindow.cpp \
     Camera/camera.cpp \
-    Network/network.cpp
+    Network/network.cpp \
+    Network/parserTask.cpp \
+    Network/tcp_sock.cpp
 
 HEADERS  += mainwindow.h \
     Camera/camera.h \
     config.h \
     Network/network.h \
-    Hardware/Buzzer/buzzer.h
+    Hardware/Buzzer/buzzer.h \
+    Network/parserInfo.h \
+    Network/tcp_sock.h
 
 FORMS    += mainwindow.ui
 
 INCLUDEPATH += /usr/local/include
+INCLUDEPATH += /usr/local/include/c++/6.3.0/
 
 LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_tracking -lopencv_videoio -lraspicam_cv -lraspicam -lwiringPi -lwiringPiDev
 

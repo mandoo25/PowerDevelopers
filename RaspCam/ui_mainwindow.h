@@ -13,11 +13,14 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QComboBox>
 #include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -29,6 +32,21 @@ class Ui_MainWindow
 public:
     QWidget *centralWidget;
     QTabWidget *tabWidget;
+    QWidget *SettingTab;
+    QGroupBox *groupBox;
+    QLabel *label_3;
+    QComboBox *ipcb1;
+    QComboBox *ipcb2;
+    QComboBox *ipcb3;
+    QComboBox *ipcb4;
+    QComboBox *portcb;
+    QLabel *label_4;
+    QGroupBox *groupBox_2;
+    QSlider *matchRateSlider;
+    QLabel *label_5;
+    QLabel *currentRate;
+    QGroupBox *groupBox_3;
+    QComboBox *factorycb;
     QWidget *CameraTab;
     QWidget *verticalLayoutWidget;
     QVBoxLayout *verticalLayout;
@@ -43,7 +61,6 @@ public:
     QLabel *realtimeImg;
     QLabel *label;
     QLabel *label_2;
-    QWidget *ToolsTab;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -73,6 +90,62 @@ public:
         font.setItalic(true);
         font.setWeight(75);
         tabWidget->setFont(font);
+        SettingTab = new QWidget();
+        SettingTab->setObjectName(QStringLiteral("SettingTab"));
+        groupBox = new QGroupBox(SettingTab);
+        groupBox->setObjectName(QStringLiteral("groupBox"));
+        groupBox->setGeometry(QRect(10, 10, 461, 81));
+        groupBox->setContextMenuPolicy(Qt::NoContextMenu);
+        groupBox->setAutoFillBackground(false);
+        groupBox->setFlat(false);
+        groupBox->setCheckable(false);
+        label_3 = new QLabel(groupBox);
+        label_3->setObjectName(QStringLiteral("label_3"));
+        label_3->setGeometry(QRect(10, 20, 67, 21));
+        ipcb1 = new QComboBox(groupBox);
+        ipcb1->setObjectName(QStringLiteral("ipcb1"));
+        ipcb1->setGeometry(QRect(10, 40, 51, 21));
+        ipcb2 = new QComboBox(groupBox);
+        ipcb2->setObjectName(QStringLiteral("ipcb2"));
+        ipcb2->setGeometry(QRect(70, 40, 51, 21));
+        ipcb3 = new QComboBox(groupBox);
+        ipcb3->setObjectName(QStringLiteral("ipcb3"));
+        ipcb3->setGeometry(QRect(130, 40, 51, 21));
+        ipcb4 = new QComboBox(groupBox);
+        ipcb4->setObjectName(QStringLiteral("ipcb4"));
+        ipcb4->setGeometry(QRect(190, 40, 51, 21));
+        portcb = new QComboBox(groupBox);
+        portcb->setObjectName(QStringLiteral("portcb"));
+        portcb->setGeometry(QRect(270, 40, 61, 21));
+        label_4 = new QLabel(groupBox);
+        label_4->setObjectName(QStringLiteral("label_4"));
+        label_4->setGeometry(QRect(270, 10, 67, 21));
+        groupBox_2 = new QGroupBox(SettingTab);
+        groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
+        groupBox_2->setGeometry(QRect(10, 110, 461, 81));
+        matchRateSlider = new QSlider(groupBox_2);
+        matchRateSlider->setObjectName(QStringLiteral("matchRateSlider"));
+        matchRateSlider->setGeometry(QRect(100, 50, 321, 26));
+        matchRateSlider->setMaximum(100);
+        matchRateSlider->setValue(65);
+        matchRateSlider->setOrientation(Qt::Horizontal);
+        label_5 = new QLabel(groupBox_2);
+        label_5->setObjectName(QStringLiteral("label_5"));
+        label_5->setGeometry(QRect(10, 20, 67, 21));
+        currentRate = new QLabel(groupBox_2);
+        currentRate->setObjectName(QStringLiteral("currentRate"));
+        currentRate->setGeometry(QRect(10, 40, 61, 41));
+        QFont font1;
+        font1.setPointSize(25);
+        currentRate->setFont(font1);
+        currentRate->setTextFormat(Qt::AutoText);
+        groupBox_3 = new QGroupBox(SettingTab);
+        groupBox_3->setObjectName(QStringLiteral("groupBox_3"));
+        groupBox_3->setGeometry(QRect(10, 190, 461, 80));
+        factorycb = new QComboBox(groupBox_3);
+        factorycb->setObjectName(QStringLiteral("factorycb"));
+        factorycb->setGeometry(QRect(10, 40, 171, 21));
+        tabWidget->addTab(SettingTab, QString());
         CameraTab = new QWidget();
         CameraTab->setObjectName(QStringLiteral("CameraTab"));
         QPalette palette1;
@@ -193,9 +266,6 @@ public:
         label_2->setObjectName(QStringLiteral("label_2"));
         label_2->setGeometry(QRect(350, 10, 111, 21));
         tabWidget->addTab(CameraTab, QString());
-        ToolsTab = new QWidget();
-        ToolsTab->setObjectName(QStringLiteral("ToolsTab"));
-        tabWidget->addTab(ToolsTab, QString());
         MainWindow->setCentralWidget(centralWidget);
 
         retranslateUi(MainWindow);
@@ -209,6 +279,14 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", Q_NULLPTR));
+        groupBox->setTitle(QApplication::translate("MainWindow", "Network Settings", Q_NULLPTR));
+        label_3->setText(QApplication::translate("MainWindow", "IP Address", Q_NULLPTR));
+        label_4->setText(QApplication::translate("MainWindow", "Port", Q_NULLPTR));
+        groupBox_2->setTitle(QApplication::translate("MainWindow", "Image Process Settings", Q_NULLPTR));
+        label_5->setText(QApplication::translate("MainWindow", "Match Rate", Q_NULLPTR));
+        currentRate->setText(QApplication::translate("MainWindow", "65%", Q_NULLPTR));
+        groupBox_3->setTitle(QApplication::translate("MainWindow", "Factory Process", Q_NULLPTR));
+        tabWidget->setTabText(tabWidget->indexOf(SettingTab), QApplication::translate("MainWindow", "Settings", Q_NULLPTR));
         capturedImg1->setText(QString());
         capturedImg4->setText(QString());
         capturedImg3->setText(QString());
@@ -219,7 +297,6 @@ public:
         label->setText(QApplication::translate("MainWindow", "Streaming Image", Q_NULLPTR));
         label_2->setText(QApplication::translate("MainWindow", "Captured Images", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(CameraTab), QApplication::translate("MainWindow", "Camera", Q_NULLPTR));
-        tabWidget->setTabText(tabWidget->indexOf(ToolsTab), QApplication::translate("MainWindow", "Tools", Q_NULLPTR));
     } // retranslateUi
 
 };

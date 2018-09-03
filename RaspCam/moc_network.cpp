@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Network_t {
-    QByteArrayData data[3];
-    char stringdata0[22];
+    QByteArrayData data[4];
+    char stringdata0[38];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -30,11 +30,12 @@ struct qt_meta_stringdata_Network_t {
 static const qt_meta_stringdata_Network_t qt_meta_stringdata_Network = {
     {
 QT_MOC_LITERAL(0, 0, 7), // "Network"
-QT_MOC_LITERAL(1, 8, 12), // "updateRawImg"
-QT_MOC_LITERAL(2, 21, 0) // ""
+QT_MOC_LITERAL(1, 8, 13), // "imgProcessFin"
+QT_MOC_LITERAL(2, 22, 0), // ""
+QT_MOC_LITERAL(3, 23, 14) // "sendRawImgData"
 
     },
-    "Network\0updateRawImg\0"
+    "Network\0imgProcessFin\0\0sendRawImgData"
 };
 #undef QT_MOC_LITERAL
 
@@ -44,7 +45,7 @@ static const uint qt_meta_data_Network[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       1,   14, // methods
+       2,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -52,9 +53,15 @@ static const uint qt_meta_data_Network[] = {
        1,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,   19,    2, 0x06 /* Public */,
+       1,    0,   24,    2, 0x06 /* Public */,
+
+ // slots: name, argc, parameters, tag, flags
+       3,    0,   25,    2, 0x08 /* Private */,
 
  // signals: parameters
+    QMetaType::Void,
+
+ // slots: parameters
     QMetaType::Void,
 
        0        // eod
@@ -66,7 +73,8 @@ void Network::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
         Network *_t = static_cast<Network *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->updateRawImg(); break;
+        case 0: _t->imgProcessFin(); break;
+        case 1: _t->sendRawImgData(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -74,7 +82,7 @@ void Network::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
         void **func = reinterpret_cast<void **>(_a[1]);
         {
             typedef void (Network::*_t)();
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&Network::updateRawImg)) {
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&Network::imgProcessFin)) {
                 *result = 0;
                 return;
             }
@@ -108,19 +116,19 @@ int Network::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 1)
+        if (_id < 2)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 1;
+        _id -= 2;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 1)
+        if (_id < 2)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 1;
+        _id -= 2;
     }
     return _id;
 }
 
 // SIGNAL 0
-void Network::updateRawImg()
+void Network::imgProcessFin()
 {
     QMetaObject::activate(this, &staticMetaObject, 0, Q_NULLPTR);
 }

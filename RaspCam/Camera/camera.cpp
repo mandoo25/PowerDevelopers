@@ -75,18 +75,29 @@ cv::Mat Camera::getCapturedImg()
 
 
 
-byte * Camera::getCapturedRawImg()
+std::vector<byte> Camera::getCapturedRawImg()
 {
     Mat image;
-
+/*
     captuerImgMutex.lock();
     image = this->capturedImg;
     int size = image.rows*image.cols;
     byte bytes[size];
     std::memcpy(bytes,image.data,size * sizeof(byte));
     captuerImgMutex.unlock();
+*/
+    captuerImgMutex.lock();
+    image = this->capturedImg;
 
-    return bytes;
+    std::vector<uchar> buff;//buffer for coding
+    std::vector<int> param(2);
+    param[0] = cv::IMWRITE_JPEG_QUALITY;
+    param[1] = 80;//default(95) 0-100
+    cv::imencode(".jpg", image, buff, param);
+
+    captuerImgMutex.unlock();
+
+    return buff;
 }
 
 

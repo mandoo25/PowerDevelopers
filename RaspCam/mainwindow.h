@@ -29,10 +29,16 @@ private slots:
 
     void getRawImg();
 
+    void on_matchRateSlider_sliderMoved(int position);
+	
+	void updateIPResult();
+
 private:
     Ui::MainWindow *ui;
     Camera * camTh;
     Network * netTh;
+
+    void drawImg(int idx,int x, int y, bool result, bool shift);
 
 signals :
     void updateRawImgFin();

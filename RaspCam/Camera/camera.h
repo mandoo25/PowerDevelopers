@@ -27,7 +27,7 @@ public:
     void setCameraSize(unsigned int width, unsigned int height);
     bool initCamera(unsigned int width, unsigned int height);
     cv::Mat getCapturedImg();
-    byte * getCapturedRawImg();
+    std::vector<byte> getCapturedRawImg();
 
 private:
     unsigned int pollingPeriod;

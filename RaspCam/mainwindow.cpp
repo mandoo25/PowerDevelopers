@@ -12,20 +12,35 @@ MainWindow::MainWindow(QWidget *parent) :
     // set titleless window
     this->setWindowFlags(Qt::Popup);
 
+
     // init camera
     this->camTh = new Camera(D_CAMERA_POLLING_MSEC, D_CAMEARA_CAPTURE_WIDTH, D_CAMEARA_CAPTURE_HEIGHT);
     connect(this->camTh, SIGNAL(captureImg()), this, SLOT(streamImg()));
     this->camTh->start();
 
-
-
     // init nework
     this->netTh = new Network(D_NETWORK_SLEEP_MSEC);
-    connect(this->netTh, SIGNAL(updateRawImg()), this, SLOT(getRawImg()));
-    connect(this->netTh, SIGNAL(updateRawImgFin()), this, SLOT(sendRawImgData()));
-
+    // connect(this->netTh, SIGNAL(updateRawImg()), this, SLOT(getRawImg()));
+    connect(this, SIGNAL(updateRawImgFin()), this->netTh, SLOT(sendRawImgData()));
+	connect(this->netTh, SIGNAL(imgProcessFin()), this, SLOT(updateIPResult()));
+    this->netTh->start();
 
     ui->setupUi(this);
+
+    for(int i = 0 ; i <= 255 ; i++)
+    {
+        QString s = QString::number(i);
+
+        ui->ipcb1->addItem(s);
+        ui->ipcb2->addItem(s);
+        ui->ipcb3->addItem(s);
+        ui->ipcb4->addItem(s);
+    }
+
+    ui->portcb->addItem("8080");
+
+    ui->factorycb->addItem("main 8");
+
 }
 
 MainWindow::~MainWindow()
@@ -36,7 +51,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::getRawImg()
 {
-    byte * rawImg = this->camTh->getCapturedRawImg();
+    std::vector<byte> rawImg = this->camTh->getCapturedRawImg();
     this->netTh->setRawImgData(rawImg);
     emit updateRawImgFin();
 }
@@ -58,7 +73,14 @@ void MainWindow::on_exitButton_clicked()
     this->close();
 }
 
-void MainWindow::on_captureButton_clicked()
+void MainWindow::updateIPResult()
+{
+	// show result data
+    this->drawImg(0,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.result,false);
+}
+
+
+void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
 {
 #define MAX_CAPURES  5
     static int cnt = 1;
@@ -77,8 +99,23 @@ void MainWindow::on_captureButton_clicked()
         ui->capturedImg1, ui->capturedImg2, ui->capturedImg3, ui->capturedImg4, ui->capturedImg5,
     };
 
-    img[0] = this->camTh->getCapturedImg();
-    cv::cvtColor(img[0], img[0], CV_BGR2RGB);
+	if(shift == true)
+	{
+		img[0] = this->camTh->getCapturedImg();
+		cv::cvtColor(img[0], img[0], CV_BGR2RGB);
+	}
+
+    if(0 <= idx && idx < MAX_CAPURES)
+    {
+        if(result == true)
+        {
+            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols, img[idx].rows-50), Scalar(0,255,0), 50);
+        }
+        else
+        {
+            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols, img[idx].rows-50), Scalar(255,0,0), 50);
+        }
+    }
 
     for(int i = 0 ; i < cnt ; i++)
     {
@@ -87,11 +124,27 @@ void MainWindow::on_captureButton_clicked()
         lb[i]->setPixmap(QPixmap::fromImage(QImage(img[i].data, img[i].cols, img[i].rows, img[i].step, QImage::Format_RGB888)));
     }
 
-    for(int i = MAX_CAPURES - 1; i > 0 ;i--)
-    {
-        img[i] = img[i - 1].clone();
-    }
+	if(shift)
+	{
+		for(int i = MAX_CAPURES - 1; i > 0 ;i--)
+		{
+			img[i] = img[i - 1].clone();
+		}
+		if(++cnt > (MAX_CAPURES-1)) cnt = MAX_CAPURES;
+	}
+}
 
-    if(++cnt > (MAX_CAPURES-1)) cnt = MAX_CAPURES;
+void MainWindow::on_captureButton_clicked()
+{
+    this->getRawImg();
+    this->drawImg(-1,0,0, false, true);
 
 }
+
+void MainWindow::on_matchRateSlider_sliderMoved(int position)
+{
+    QString s = QString::number(position);
+    s.append("%");
+    ui->currentRate->setText(s);
+}
+
