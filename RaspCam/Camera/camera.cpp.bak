@@ -101,7 +101,7 @@ void Camera::run()
         cam.grab();
         cam.retrieve(img);
 
-        // cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH, D_CAMERA_DISPLAYED_HEIGHT), 0, 0, CV_INTER_LINEAR);
+        cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH, D_CAMERA_DISPLAYED_HEIGHT), 0, 0, CV_INTER_LINEAR);
 
         // image update
         this->updateImg(img);
