@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_DEPRECATED_WARNINGS -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -isystem /usr/local/include -isystem /usr/include/arm-linux-gnueabihf/qt5 -isystem /usr/include/arm-linux-gnueabihf/qt5/QtWidgets -isystem /usr/include/arm-linux-gnueabihf/qt5/QtGui -isystem /usr/include/arm-linux-gnueabihf/qt5/QtCore -I. -I. -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++
+INCPATH       = -I. -isystem /usr/local/include -isystem /usr/local/include/c++/6.3.0/ -isystem /usr/include/arm-linux-gnueabihf/qt5 -isystem /usr/include/arm-linux-gnueabihf/qt5/QtWidgets -isystem /usr/include/arm-linux-gnueabihf/qt5/QtGui -isystem /usr/include/arm-linux-gnueabihf/qt5/QtCore -I. -I. -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++
 QMAKE         = /usr/lib/arm-linux-gnueabihf/qt5/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -33,7 +33,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = RaspCam1.0.0
-DISTDIR = /home/pi/src/Prj/PowerDevelopers/RaspCam/.tmp/RaspCam1.0.0
+DISTDIR = /home/pi/src/Prj/master/PowerDevelopers/RaspCam/.tmp/RaspCam1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1
 LIBS          = $(SUBLIBS) -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_tracking -lopencv_videoio -lraspicam_cv -lraspicam -lwiringPi -lwiringPiDev -lQt5Widgets -lQt5Gui -lQt5Core -lGLESv2 -lpthread 
@@ -51,14 +51,20 @@ OBJECTS_DIR   = ./
 SOURCES       = main.cpp \
 		mainwindow.cpp \
 		Camera/camera.cpp \
-		Network/network.cpp moc_mainwindow.cpp \
-		moc_camera.cpp
+		Network/network.cpp \
+		Network/parserTask.cpp \
+		Network/tcp_sock.cpp moc_mainwindow.cpp \
+		moc_camera.cpp \
+		moc_network.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
 		camera.o \
 		network.o \
+		parserTask.o \
+		tcp_sock.o \
 		moc_mainwindow.o \
-		moc_camera.o
+		moc_camera.o \
+		moc_network.o
 DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/unix.conf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/linux.conf \
@@ -121,10 +127,16 @@ DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/lex.prf \
 		RaspCam.pro mainwindow.h \
 		Camera/camera.h \
-		config.h main.cpp \
+		config.h \
+		Network/network.h \
+		Hardware/Buzzer/buzzer.h \
+		Network/parserInfo.h \
+		Network/tcp_sock.h main.cpp \
 		mainwindow.cpp \
 		Camera/camera.cpp \
-		Network/network.cpp
+		Network/network.cpp \
+		Network/parserTask.cpp \
+		Network/tcp_sock.cpp
 QMAKE_TARGET  = RaspCam
 DESTDIR       = 
 TARGET        = RaspCam
@@ -279,8 +291,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.h Camera/camera.h config.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mainwindow.cpp Camera/camera.cpp Network/network.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.h Camera/camera.h config.h Network/network.h Hardware/Buzzer/buzzer.h Network/parserInfo.h Network/tcp_sock.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mainwindow.cpp Camera/camera.cpp Network/network.cpp Network/parserTask.cpp Network/tcp_sock.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents mainwindow.ui $(DISTDIR)/
 
 
@@ -307,16 +319,25 @@ benchmark: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_mainwindow.cpp moc_camera.cpp
+compiler_moc_header_make_all: moc_mainwindow.cpp moc_camera.cpp moc_network.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_mainwindow.cpp moc_camera.cpp
-moc_mainwindow.cpp: mainwindow.h \
+	-$(DEL_FILE) moc_mainwindow.cpp moc_camera.cpp moc_network.cpp
+moc_mainwindow.cpp: Camera/camera.h \
+		config.h \
+		Network/network.h \
+		mainwindow.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include mainwindow.h -o moc_mainwindow.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/master/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include mainwindow.h -o moc_mainwindow.cpp
 
-moc_camera.cpp: Camera/camera.h \
+moc_camera.cpp: config.h \
+		Camera/camera.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Camera/camera.h -o moc_camera.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/master/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Camera/camera.h -o moc_camera.cpp
+
+moc_network.cpp: config.h \
+		Network/network.h \
+		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/master/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Network/network.h -o moc_network.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -337,26 +358,47 @@ compiler_clean: compiler_moc_header_clean compiler_uic_clean
 
 ####### Compile
 
-main.o: main.cpp mainwindow.h
+main.o: main.cpp mainwindow.h \
+		Camera/camera.h \
+		config.h \
+		Network/network.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 mainwindow.o: mainwindow.cpp mainwindow.h \
-		ui_mainwindow.h \
 		Camera/camera.h \
-		config.h
+		config.h \
+		Network/network.h \
+		ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o mainwindow.cpp
 
-camera.o: Camera/camera.cpp Camera/camera.h
+camera.o: Camera/camera.cpp Camera/camera.h \
+		config.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o camera.o Camera/camera.cpp
 
-network.o: Network/network.cpp 
+network.o: Network/network.cpp Network/network.h \
+		config.h \
+		Network/parserInfo.h \
+		Network/tcp_sock.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o network.o Network/network.cpp
+
+parserTask.o: Network/parserTask.cpp Network/parserInfo.h \
+		Network/tcp_sock.h \
+		Network/network.h \
+		config.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parserTask.o Network/parserTask.cpp
+
+tcp_sock.o: Network/tcp_sock.cpp Network/tcp_sock.h \
+		Network/parserInfo.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tcp_sock.o Network/tcp_sock.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
 
 moc_camera.o: moc_camera.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_camera.o moc_camera.cpp
+
+moc_network.o: moc_network.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_network.o moc_network.cpp
 
 ####### Install
 
