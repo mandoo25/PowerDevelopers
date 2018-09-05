@@ -16,6 +16,7 @@
 
 #include "parserInfo.h"
 #include "tcp_sock.h"
+#include "network.h"
 
 using namespace std;
 
@@ -25,25 +26,27 @@ queue<jobInfo_t *> job_list;
 //condition_variable cond_;
 static jobInfo_t *currentJobData;
 static char order_num[128];
+static tcp_client comm;
 
-int appendJob(const jobInfo_t *job);
+int appendJob(jobInfo_t *job);
 void deleteJob(jobInfo_t *job);
 extern int buildPacket(packInfo_tx *info);
 bool parsePacket(packInfo_rx *info, char *data);
 bool verifyPackInfo(packInfo_rx *info);
 void test_makeRAWdata(char *img, unsigned int *size);
+Network *netHander;
 
 extern int transfer_data_main(void)
 {
 
 	int rval;
-	tcp_client comm;
+    //tcp_client comm;
 	string host;
 
     //qDebug() <<"Entered hostname : 10.1.31.57:5001";
     //cin>>host;
 
-	host = "10.1.31.57";
+    host = "10.1.31.105";
 
 #if 0
 	//connect to host
@@ -103,17 +106,23 @@ extern int transfer_data_main(void)
             return -1;
         }
 
-		currentJobData =job_list.front();
+        currentJobData =(jobInfo_t *)job_list.front(); //have to fix here!
+
 		//send some data
 
-		if(!comm.send_data((jobInfo_t*)currentJobData))
+        printf("beforeSend::cmd:type: %d\n", currentJobData->txPackInfo->cmd_type);
+        printf("beforeSend::action:type: %d\n", currentJobData->txPackInfo->action_type);
+        printf("beforeSend::img:size: %d\n", currentJobData->txPackInfo->image_size);
+        if(!comm.send_data((jobInfo_t *)currentJobData))
 		{
 			cout << "send falure" << endl;
 		}
 
 		//here : receive packet
-		comm.receive((jobInfo_t*)currentJobData);
+        comm.receive((jobInfo_t*)currentJobData);
 		//deleteJob(temp);
+
+
 
 
 	}
@@ -124,13 +133,18 @@ extern int transfer_data_main(void)
 
 }
 
+extern void setNetworkHandler(Network* net)
+{
+    netHander = net;
+}
+
 int receiveFunc(char *data)
 {
 	bool ret;
 	cout << "[call]" << __FUNCTION__ <<endl;
 
-	packInfo_rx *info = (packInfo_rx*)malloc(sizeof(char)*1*1024);
-#if 0
+    packInfo_rx *info = (packInfo_rx*)malloc(sizeof(char)*5*1024);
+#if 1
 	ret = parsePacket(info, data);
 	if(ret != true)
 	{
@@ -146,7 +160,7 @@ int receiveFunc(char *data)
 	printf("info->coord_x: %d\n", info->coordinate_x);
 	printf("info->coord_y: %d\n", info->coordinate_y);
 	printf("info->data_size: %d\n", info->data_size);
-	printf("info->res_data:%s\n", info->data);
+    //printf("info->res_data:%d %d %d %d\n", info->data[0],info->data[1],info->data[2],info->data[3] );
 
 	if(info->cmd_type == CMD_TYPE_ACK)
 	{
@@ -159,8 +173,8 @@ int receiveFunc(char *data)
 
 			/* do something * */
 
-			printf(":::::: %p\n", currentJobData);
-			deleteJob(currentJobData);
+            printf(":::::: %p\n", currentJobData);
+            deleteJob(currentJobData);
 		}
 	}
 	else if(info->cmd_type == CMD_TYPE_NACK)
@@ -172,10 +186,17 @@ int receiveFunc(char *data)
 	}
 #endif
 
-	deleteJob(currentJobData);
+#if 1
+//    Network *net = Network::getInstance();
+    netHander->setIpResults(200, 300, 1);
+    emit netHander->imgProcessFin();
+
+#endif
+    deleteJob(currentJobData);
 
 	free(info);
-
+    //temporarily call
+    comm.close_sock();
 
 
 	return 1;
@@ -206,10 +227,11 @@ int buildPacket(packInfo_tx *info)
 	printf("work: %d\n", info->item_id);
 	printf("size: %d\n", info->image_size);
 
-	jobInfo_t *newJob = (jobInfo_t *)malloc(sizeof(jobInfo_t));
+    jobInfo_t *newJob = (jobInfo_t *)malloc(sizeof(jobInfo_t));
 	//memset(newJob.order_num, 0, sizeof(newJob.order_num));
 	newJob->txData = rq_data;
-	newJob->txPackInfo = info;
+    newJob->txPackInfo = (packInfo_tx *)info;
+    //printf("img:: size : %d\n", newJob->txPackInfo->image_size);
 	newJob->callback = (callbackFunc)receiveFunc;
 	//add job
 	appendJob(newJob);
@@ -218,7 +240,7 @@ int buildPacket(packInfo_tx *info)
 }
 
 
-int appendJob(const jobInfo_t *job)
+int appendJob(jobInfo_t *job)
 {
 	cout << "[push] new job" << endl;
 	//unique_lockMedics mlock(mutex_);
@@ -239,8 +261,7 @@ void deleteJob(jobInfo_t *job)
 }
 
 bool parsePacket(packInfo_rx *info, char *data)
-{
-	printf("rev packet size: %d\n", strlen(data));
+{	
 	if(data != NULL)
 	{
 		char * rs_data = data;
@@ -264,7 +285,7 @@ bool parsePacket(packInfo_rx *info, char *data)
 bool verifyPackInfo(packInfo_rx *info)
 {
 	bool rval = false;
-	packInfo_tx *cPack = currentJobData->txPackInfo;
+    packInfo_tx *cPack = currentJobData->txPackInfo;
 
 	if(cPack->cell_num == info->cell_num && (cPack->process_num == info->process_num) \
 			&& cPack->action_type == info->action_type && (cPack->item_id == info->item_id))

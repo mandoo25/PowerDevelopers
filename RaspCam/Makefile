@@ -376,11 +376,15 @@ camera.o: Camera/camera.cpp Camera/camera.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o camera.o Camera/camera.cpp
 
 network.o: Network/network.cpp Network/network.h \
-		config.h
+		config.h \
+		Network/parserInfo.h \
+		Network/tcp_sock.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o network.o Network/network.cpp
 
 parserTask.o: Network/parserTask.cpp Network/parserInfo.h \
-		Network/tcp_sock.h
+		Network/tcp_sock.h \
+		Network/network.h \
+		config.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parserTask.o Network/parserTask.cpp
 
 tcp_sock.o: Network/tcp_sock.cpp Network/tcp_sock.h \

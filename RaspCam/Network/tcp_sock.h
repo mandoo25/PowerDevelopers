@@ -15,6 +15,7 @@
 #include <sys/socket.h>    //socket
 #include <arpa/inet.h> //inet_addr
 #include <netdb.h> //hostent
+#include <unistd.h>
 
 #include "parserInfo.h"
 
@@ -37,6 +38,7 @@ public:
     int conn(string, int);
     bool send_data(jobInfo_t *data);
     bool receive(jobInfo_t *data);
+    bool close_sock(void);
 };
 
 

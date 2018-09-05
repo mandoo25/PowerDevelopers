@@ -14,25 +14,35 @@ class Network : public QThread
 public:
     Network(unsigned int msecPollingPeriod);
 
-    void setRawImgData(std::vector<byte>);
+    void setRawImgData(uchar * data);
+	uchar * getRawImgData(void);
+	
+	void setRawImgDataSize(int size);
 
     void exit();
     bool isEnable();
 	
 	//result data
-	struct IpResult
+    struct IpResult
 	{
 		int x;
 		int y;
 		bool result;
-	}ipResult;
+	}ipResult;    
+
+    static Network *getInstance() { return &net_instance; }
+
+    void setIpResults(int x, int y, bool res);
 
 private:
     unsigned int pollingPeriod;
     bool _exit;
     bool _enabled;
     void run();
-    std::vector<byte> rawDataImg;
+    
+	uchar * rawDataImg;
+	int rawDataImgSize;
+    static Network net_instance;
 	
 	
 

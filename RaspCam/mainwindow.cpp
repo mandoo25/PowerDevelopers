@@ -51,8 +51,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::getRawImg()
 {
-    std::vector<byte> rawImg = this->camTh->getCapturedRawImg();
-    this->netTh->setRawImgData(rawImg);
+    int size;
+	uchar * data;
+	
+	data = this->camTh->getCapturedRawImg(&size);  	
+	
+	this->netTh->setRawImgData(data);
+	this->netTh->setRawImgDataSize(size);
+	
     emit updateRawImgFin();
 }
 
@@ -109,11 +115,11 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
     {
         if(result == true)
         {
-            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols, img[idx].rows-50), Scalar(0,255,0), 50);
+            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(0,255,0), 10);
         }
         else
         {
-            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols, img[idx].rows-50), Scalar(255,0,0), 50);
+            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(255,0,0), 10);
         }
     }
 

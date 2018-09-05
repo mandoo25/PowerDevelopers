@@ -6,13 +6,17 @@
 
 
 extern int transfer_data_main(void);
+extern void setNetworkHandler(Network* net);
 
 Network::Network(unsigned int msecPollingPeriod)
 {
     this->pollingPeriod = msecPollingPeriod;
     this->_exit = false;
 
+	
     // plz write somthing want to initialize
+    setNetworkHandler(this);
+
 }
 
 
@@ -25,12 +29,13 @@ void Network::run()
 {
 
 
+    qDebug() << "enter Network func" << endl;
+
     while(!this->_exit)
     {
 
         // interrupt : updateRawImg
-        // emit updateRawImg();
-        qDebug() << "enter my func" << endl;
+        // emit updateRawImg();        
         transfer_data_main();
 
         //emit imgProcessFin();
@@ -40,10 +45,22 @@ void Network::run()
 
 }
 
-void Network::setRawImgData(std::vector<byte> data)
+void Network::setRawImgData(uchar * data)
 {
     this->rawDataImg = data;
 }
+
+uchar * Network::getRawImgData(void)
+{
+    return this->rawDataImg;
+}
+
+
+void Network::setRawImgDataSize(int size)
+{
+	this->rawDataImgSize = size;
+}
+
 
 
 void Network::sendRawImgData()
@@ -52,7 +69,7 @@ void Network::sendRawImgData()
     //packinfo
 
    //data*
-   qDebug() << this->rawDataImg.size() << endl;
+   qDebug() << this->rawDataImgSize << endl;
 
    packInfo_tx pack;
    memset(&pack, 0, sizeof(packInfo_tx));
@@ -63,14 +80,28 @@ void Network::sendRawImgData()
    pack.cell_num = 1;
    pack.process_num = 1;
    pack.accuracy = 100;
-   pack.image_size = this->rawDataImg.size();
+   pack.order_size = 0;
+   //pack.image_size = this->rawDataImg->size();
    //pack.image_data = (char *)this->rawDataImg;
-   pack.image_data = reinterpret_cast<char*>(this->rawDataImg.data());
-   qDebug() << "data: "<< pack.image_data <<endl;
-
+   //pack.image_data = reinterpret_cast<char*>(this->rawDataImg->data());
+   pack.image_size = this->rawDataImgSize;
+   pack.image_data = (char*)this->rawDataImg;
+   //qDebug() << "image data handler: "<< pack.image_data <<endl;
+   //printf("?????: %d\n", this->rawDataImg);
+   printf("image size : %d\n", pack.image_size);
+   
+   printf("%p\n", &pack);
    buildPacket(&pack);
 
 
+}
+
+void Network::setIpResults(int x, int y, bool res)
+{
+    printf("network::setIpResults\n");
+    this->ipResult.x = x;
+    this->ipResult.y = y;
+    this->ipResult.result = res;
 }
 
 
