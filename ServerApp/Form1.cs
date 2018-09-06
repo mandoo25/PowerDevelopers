@@ -185,6 +185,9 @@ namespace EfficientApp
             public byte item_id;
             public byte cell_number;
             public byte process_number;
+            public int coordinates_x;
+            public int coordinates_y;
+            public byte matching_rate;
             public byte data_size;
             public String data;
         }
@@ -338,7 +341,7 @@ namespace EfficientApp
 
         private void InitializeDataBase()
         {
-            string MyConString = "Server=127.0.0.1; Port=3308; Database=log; Uid=root; Password=root; SslMode=none";
+            string MyConString = "Server=10.1.31.105; Port=3308; Database=k595np; Uid=root; Password=root; SslMode=none; charset=utf8";
             mySqlConn = new MySqlConnection(MyConString);
             mySqlConn.Open();
 
@@ -800,7 +803,7 @@ namespace EfficientApp
             }
         }
 
-        public void backupImages(ref ReqCmd reqCmd, string serial_num, bool result)
+        public void backupImages(ref ReqCmd reqCmd, string serial_num, byte result)
         {
             string saveFilePath = backupDirectory + reqCmd.cur_date + "\\";
             string saveFileName = string.Format("item{0}.jpg", reqCmd.item_id);
@@ -815,7 +818,7 @@ namespace EfficientApp
             }
 
             String strFileTmp;
-            if (result == true && serial_num != null)
+            if (result == (byte)CmdType.CMD_TYPE_ACK && serial_num != null)
             {                
                 strFileTmp = saveFilePath + saveFileName; 
                 FileInfo fi = new FileInfo(strFileTmp);
@@ -890,7 +893,6 @@ namespace EfficientApp
                     UpdateGUI(resultId);
                     print_log((byte)LogType.info, resultId);
                     print_log((byte)LogType.info, string.Format("length : {0}", resultId.Length));
-                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
                     respAck.action_type = reqCmd.action_type;
                     respAck.item_id = reqCmd.item_id;
                     respAck.cell_number = reqCmd.cell_number;
@@ -898,7 +900,6 @@ namespace EfficientApp
 
                     respAck.data_size = (byte)resultId.Length;
                     respAck.data = resultId;
-
 
                     if (reqCmd.item_id == (byte)WorkItems.order)
                     {
@@ -909,17 +910,30 @@ namespace EfficientApp
                             respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                             print_log((byte)LogType.info, string.Format("orderCont.SerialNum NULL"));
                         }
-                        backupImages(ref reqCmd, orderCont.SerialNum, true);
+                        else
+                        {
+                            respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                        }
+                        backupImages(ref reqCmd, orderCont.SerialNum, respAck.cmd_type);
                         //if(orderCont.SerialNum != null) saveFilePath = saveFilePath + orderCont.SerialNum + "\\";
                     }
                     else
                     {
+                        if (CheckBarcodeValue(reqCmd, respAck))
+                        {
+                            respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                        }
+                        else
+                        {
+                            respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                        }
+
                         if (reqCmd.serial_str == null)
                         {
                             respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                             print_log((byte)LogType.info, string.Format("reqCmd.serial_str"));
                         }
-                        backupImages(ref reqCmd, reqCmd.serial_str, true);
+                        backupImages(ref reqCmd, reqCmd.serial_str, respAck.cmd_type);
                         //if (reqCmd.serial_str != null) saveFilePath = saveFilePath + reqCmd.serial_str + "\\";
                     }                   
                 }
@@ -927,7 +941,7 @@ namespace EfficientApp
                 {
                     respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                     print_log((byte)LogType.info, string.Format("myIDTool.Results.Count : {0}", myIDTool.Results.Count));
-                    backupImages(ref reqCmd, null, false);
+                    backupImages(ref reqCmd, null, respAck.cmd_type);
                 }
 
                 while(myJob.State != CogJobStateConstants.Stopped)
@@ -945,6 +959,94 @@ namespace EfficientApp
             }
 
 
+
+            return respAck;
+        }
+
+        public RespAck CogActExist(ref ReqCmd reqCmd)
+        {
+            RespAck respAck = new RespAck();
+
+            try
+            {                
+                CogToolGroup myTG = myJob.VisionTool as CogToolGroup;
+                CogImageFileTool myIFTool = myTG.Tools["CogImageFileTool1"] as CogImageFileTool;
+
+                //string openFilePath = refDirectory + string.Format("verification\\cell{0}\\main{1}\\", reqCmd.cell_number, reqCmd.process_number);
+                string openFilePath = verificationDirectory;
+                //string openFileName = Enum.GetName(typeof(ActionType), reqCmd.action_type) + "_" + Enum.GetName(typeof(WorkItems), reqCmd.item_id) + ".jpg";
+                string openFileName = verificationFile;
+
+                //MessageBox.Show(openFilePath + openFileName);
+                myIFTool.Operator.Open(openFilePath + openFileName, CogImageFileModeConstants.Read);
+
+                myJob.Run();
+                UpdateGUI("Run");
+
+                save_wait_f = 1;
+                while (save_wait_f == 1)
+                {
+                    Thread.Sleep(1);
+                }
+
+
+                CogPMAlignTool myPMAlignTool = myTG.Tools["CogPMAlignTool1"] as CogPMAlignTool;
+                if (myPMAlignTool.Results.Count > 0)
+                {
+                    byte resultScore = (byte)(myPMAlignTool.Results[0].Score*100);
+
+                    print_log((byte)LogType.info, string.Format("myPMAlignTool.Results[0].Score : {0}", resultScore));
+                    //MessageBox.Show(resultId);
+                    UpdateGUI(string.Format("Score={0}", resultScore));
+                    
+                    respAck.action_type = reqCmd.action_type;
+                    respAck.item_id = reqCmd.item_id;
+                    respAck.cell_number = reqCmd.cell_number;
+                    respAck.process_number = reqCmd.process_number;
+                    respAck.matching_rate = resultScore;
+                    respAck.coordinates_x = (int)myPMAlignTool.Results[0].GetPose().TranslationX;
+                    respAck.coordinates_y = (int)myPMAlignTool.Results[0].GetPose().TranslationY;
+
+                    respAck.data_size = 0;
+
+                    if (resultScore >= reqCmd.accracy)
+                    {
+                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                    }
+                    else
+                    {
+                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                    }
+
+                    if (reqCmd.serial_str == null)
+                    {
+                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                        print_log((byte)LogType.info, string.Format("reqCmd.serial_str"));
+                    }
+                    backupImages(ref reqCmd, reqCmd.serial_str, respAck.cmd_type);
+                    //if (reqCmd.serial_str != null) saveFilePath = saveFilePath + reqCmd.serial_str + "\\";
+                    
+                }
+                else
+                {
+                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                    print_log((byte)LogType.info, string.Format("myPMAlignTool.Results.Count : {0}", myPMAlignTool.Results.Count));
+                    backupImages(ref reqCmd, null, respAck.cmd_type);
+                }
+
+                while (myJob.State != CogJobStateConstants.Stopped)
+                {
+                    Thread.Sleep(1);
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.err, ex.Message);
+            }
 
             return respAck;
         }
@@ -1006,12 +1108,12 @@ namespace EfficientApp
                     {
                         OrderContents orderCont = new OrderContents();
                         orderCont.analysis(resultId);
-                        backupImages(ref reqCmd, orderCont.SerialNum, true);
+                        backupImages(ref reqCmd, orderCont.SerialNum, 0);
                         //if(orderCont.SerialNum != null) saveFilePath = saveFilePath + orderCont.SerialNum + "\\";
                     }
                     else
                     {
-                        backupImages(ref reqCmd, reqCmd.serial_str, true);
+                        backupImages(ref reqCmd, reqCmd.serial_str, 0);
                         //if (reqCmd.serial_str != null) saveFilePath = saveFilePath + reqCmd.serial_str + "\\";
                     }
                 }
@@ -1019,7 +1121,7 @@ namespace EfficientApp
                 {
                     respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                     print_log((byte)LogType.info, string.Format("myIDTool.Results.Count : {0}", myIDTool.Results.Count));
-                    backupImages(ref reqCmd, null, false);
+                    backupImages(ref reqCmd, null, 0);
                 }
 
                 while (myJob.State != CogJobStateConstants.Stopped)
@@ -1135,6 +1237,11 @@ namespace EfficientApp
                                                     respAck = CogActBarcode(ref reqCmd);
                                                     break;
 
+                                                case (byte)ActionType.exist:
+                                                    myJob = myJobManager.Job(string.Format("Item{0}", reqCmd.item_id));
+                                                    respAck = CogActExist(ref reqCmd);
+                                                    break;
+
                                                 default:
                                                     break;
                                             }
@@ -1165,14 +1272,25 @@ namespace EfficientApp
 
                         if (netStream.CanWrite && respAck.cmd_type != 0)
                         {
-                            byte[] responseBuffer = Encoding.ASCII.GetBytes("******" + respAck.data);
+                            byte[] responseBuffer = Encoding.ASCII.GetBytes("***************" + respAck.data);
+                            int idx = 0;                            
 
-                            responseBuffer.SetValue(respAck.cmd_type, 0);
-                            responseBuffer.SetValue(respAck.action_type, 1);
-                            responseBuffer.SetValue(respAck.item_id, 2);
-                            responseBuffer.SetValue(respAck.cell_number, 3);
-                            responseBuffer.SetValue(respAck.process_number, 4);
-                            responseBuffer.SetValue(respAck.data_size, 5);                            
+                            responseBuffer.SetValue(respAck.cmd_type, idx++);
+                            responseBuffer.SetValue(respAck.action_type, idx++);
+                            responseBuffer.SetValue(respAck.item_id, idx++);
+                            responseBuffer.SetValue(respAck.cell_number, idx++);
+                            responseBuffer.SetValue(respAck.process_number, idx++);
+
+                            byte[] tmp_x = BitConverter.GetBytes(respAck.coordinates_x);
+                            byte[] tmp_y = BitConverter.GetBytes(respAck.coordinates_y);
+
+                            System.Buffer.BlockCopy(tmp_x, 0, responseBuffer, idx, tmp_x.Length);
+                            idx = idx + tmp_x.Length;
+                            System.Buffer.BlockCopy(tmp_y, 0, responseBuffer, idx, tmp_y.Length);
+                            idx = idx + tmp_y.Length;
+
+                            responseBuffer.SetValue(respAck.matching_rate, idx++);
+                            responseBuffer.SetValue(respAck.data_size, idx++);
                             
                             netStream.Write(responseBuffer, 0, responseBuffer.Length);                            
                             netStream.Flush();
@@ -1191,7 +1309,7 @@ namespace EfficientApp
 
                                 //MySqlCommand mySqlCommand = mySqlConn.CreateCommand();
                                 //mySqlCommand.CommandText = "insert into k595np values('"+reqCmd.product_str+"', '"+reqCmd.serial_str+"', '"+respAck.action_type+"', '"+respAck.item_id+"', '"+result_detail+"', '"+ reqCmd.cur_date + "', '"+reqCmd.start_time+"', '"+reqCmd.end_time+"', '"+reqCmd.due_msec+"', '"+reqCmd.cell_number+"', '"+reqCmd.process_number+"', '"+reqCmd.saveFilePath+"');";
-                                string sql = "INSERT into k595np VALUES(@ProductCode, @SerialNum, @ActionType, @WorkItems, @ResultDetail, @CheckDate, @StartTime, @EndTime, @TimeDiff, @CheckCell, @CheckProcess, @BackupImagePath);";
+                                string sql = "INSERT into log VALUES(@ProductCode, @SerialNum, @ActionType, @WorkItems, @ResultDetail, @CheckDate, @StartTime, @EndTime, @TimeDiff, @CheckCell, @CheckProcess, @BackupImagePath);";
                                 MySqlCommand cmd = new MySqlCommand(sql, mySqlConn);
                                 cmd.Parameters.AddWithValue("@ProductCode", reqCmd.product_str);
                                 cmd.Parameters.AddWithValue("@SerialNum", reqCmd.serial_str);
@@ -1245,6 +1363,59 @@ namespace EfficientApp
                 }
             }
 
+        }
+
+        public bool CheckBarcodeValue(ReqCmd reqCmd, RespAck respAck)
+        {
+
+            bool rtn = false;
+            string sql;
+            int subWorkItem = 0;
+            MySqlCommand cmd;
+            MySqlDataReader reader;
+            string value_str = null;
+
+            sql = "SELECT WorkItem" + reqCmd.item_id + " from producttable WHERE Product='" + reqCmd.product_str + "'";
+            cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            reader = cmd.ExecuteReader();
+            if(reader.HasRows)
+            {
+                reader.Read();
+                //MessageBox.Show(string.Format("{0}", reader.GetInt32(0)));
+                subWorkItem = reader.GetInt32(0);
+            }
+            reader.Close();
+
+            if (subWorkItem != 0)
+            {
+                sql = "SELECT Value from subworkitems WHERE ID=" + string.Format("{0}", subWorkItem);
+                cmd = new MySqlCommand(sql, mySqlConn);
+
+                cmd.ExecuteNonQuery();
+
+                reader = cmd.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    reader.Read();                    
+                    value_str = reader.GetString(0);
+                }
+                reader.Close();
+            }
+
+            if (value_str.Equals(respAck.data))
+            {
+                rtn = true;
+            }
+            else
+            {
+                rtn = false;
+            }
+
+            return rtn;
         }
 
         private void UpdateGUI(string s)
