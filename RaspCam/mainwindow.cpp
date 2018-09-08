@@ -5,6 +5,9 @@
 #include "Camera/camera.h"
 #include "config.h"
 
+
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -24,6 +27,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(updateRawImgFin()), this->netTh, SLOT(sendRawImgData()));
 	connect(this->netTh, SIGNAL(imgProcessFin()), this, SLOT(updateIPResult()));
     this->netTh->start();
+
+    // buzzer init
+    this->buzzerTh = new Buzzer();
+    this->buzzerTh->start();
+
+    // key init
+    this->keyTh = new Key();
+    connect(this->keyTh, SIGNAL(keyPressed()), this, SLOT(on_externalButton_pressed()));
+    this->keyTh->start();
 
     ui->setupUi(this);
 
@@ -78,6 +90,7 @@ void MainWindow::on_exitButton_clicked()
     this->camTh->exit();
     this->close();
 }
+
 
 void MainWindow::updateIPResult()
 {
@@ -145,6 +158,14 @@ void MainWindow::on_captureButton_clicked()
     this->getRawImg();
     this->drawImg(-1,0,0, false, true);
 
+}
+
+void MainWindow::on_externalButton_pressed()
+{
+    this->buzzerTh->playGetCoinMelody();
+
+    this->getRawImg();
+    this->drawImg(-1,0,0, false, true);
 }
 
 void MainWindow::on_matchRateSlider_sliderMoved(int position)
