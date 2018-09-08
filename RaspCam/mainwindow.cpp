@@ -128,10 +128,12 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
     {
         if(result == true)
         {
+            this->buzzerTh->playBonusUp();
             cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(0,255,0), 10);
         }
         else
         {
+            this->buzzerTh->playWrongMelody();
             cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(255,0,0), 10);
         }
     }

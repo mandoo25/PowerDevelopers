@@ -11,7 +11,7 @@ int getCoin[][2] =
 
 int bonusUp[][6] =
 {
-    {tones[4][G],tones[4][A], tones[5][E],tones[5][C],tones[5][D],tones[5][A]}, // tones
+    {tones[4][G],tones[4][A], tones[5][E],tones[5][C],tones[5][D],tones[5][G]}, // tones
     {8          ,8          ,8           ,8          ,8          ,8}  // beats
 };
 
@@ -46,6 +46,18 @@ int superMario3_5[][12] =
     {4           ,4           ,4           ,2           ,4           ,4           ,4           ,4           ,4           ,4           ,2 },
 };
 
+
+int getStar[][2][10] =
+{
+    {
+        {tones[5][C],tones[5][C],tones[5][C],tones[4][D],tones[5][C],tones[5][C],tones[4][D],tones[5][C],tones[4][D],tones[5][C]},
+        {4          ,4          ,3          ,8           ,4          ,4          ,3          ,8         ,8          ,8          }
+    },
+    {
+        {tones[4][B],tones[4][B],tones[4][B],tones[4][C],tones[4][B],tones[4][B],tones[4][C],tones[4][B],tones[4][C],tones[4][B]},
+        {4          ,4          ,3         ,8           ,4          ,4          ,3          ,8         ,8          ,8          }
+    },
+};
 
 int bubbleBubble[][2][8] =
 {

@@ -23,11 +23,14 @@ public:
 
     void addNote(int tone, int beat);
     void instantNote(int tone, int beat);
-    void addMelody(int * tones, int * beats, int size);
+    void addMelody(int * tones, int * beats, int size, bool cut);
 
     void playGetCoinMelody();
     void playBonusUp();
     void playBubbleBubble();
+    void playWrongMelody();
+
+    void playGetStartMelody();
 
     bool isEnabled();
 
