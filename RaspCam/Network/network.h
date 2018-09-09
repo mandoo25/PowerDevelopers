@@ -6,18 +6,18 @@
 #include <QObject>
 
 #include "config.h"
+#include "Resource/resource.h"
 
 class Network : public QThread
 {
     Q_OBJECT
 
 public:
-    Network(unsigned int msecPollingPeriod);
+    Network(unsigned int msecPollingPeriod, Resource * res);
 
-    void setRawImgData(uchar * data);
+    void setRawImgData(uchar * data, int size, int index);
 	uchar * getRawImgData(void);
-	
-	void setRawImgDataSize(int size);
+
 
     void exit();
     bool isEnable();
@@ -42,7 +42,10 @@ private:
     
 	uchar * rawDataImg;
 	int rawDataImgSize;
+    int rawDataIndex;
+
     static Network net_instance;
+    Resource * res;
 	
 	
 
@@ -50,7 +53,8 @@ private slots:
     void sendRawImgData();
 	
 signals :
-    void imgProcessFin();
+    void imgProcessFin();       // image process fininshed
+    void resourceUpdateFin();   // update resource finished
 
 };
 

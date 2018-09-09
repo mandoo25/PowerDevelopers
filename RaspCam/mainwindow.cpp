@@ -5,7 +5,7 @@
 #include "Camera/camera.h"
 #include "config.h"
 
-
+#include <qevent.h>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -13,7 +13,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     // set titleless window
-    this->setWindowFlags(Qt::Popup);
+    this->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::Popup);
+
+    //this->setWindowFlags(Qt::Popup);
+    res = new Resource();
 
 
     // init camera
@@ -22,10 +25,11 @@ MainWindow::MainWindow(QWidget *parent) :
     this->camTh->start();
 
     // init nework
-    this->netTh = new Network(D_NETWORK_SLEEP_MSEC);
+    this->netTh = new Network(D_NETWORK_SLEEP_MSEC,res);
     // connect(this->netTh, SIGNAL(updateRawImg()), this, SLOT(getRawImg()));
     connect(this, SIGNAL(updateRawImgFin()), this->netTh, SLOT(sendRawImgData()));
 	connect(this->netTh, SIGNAL(imgProcessFin()), this, SLOT(updateIPResult()));
+    connect(this->netTh, SIGNAL(resourceUpdateFin()), this, SLOT(updateResource()));
     this->netTh->start();
 
     // buzzer init
@@ -57,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    qDebug() << "delete ui";
+    qDebug() << "delete ui";    
     delete ui;
 }
 
@@ -68,8 +72,8 @@ void MainWindow::getRawImg()
 	
 	data = this->camTh->getCapturedRawImg(&size);  	
 	
-	this->netTh->setRawImgData(data);
-	this->netTh->setRawImgDataSize(size);
+    this->netTh->setRawImgData(data, size, res->getimgIdx(this->curIdx));
+
 	
     emit updateRawImgFin();
 }
@@ -99,9 +103,27 @@ void MainWindow::updateIPResult()
 }
 
 
-void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
+void MainWindow::updateResource()
 {
-#define MAX_CAPURES  5
+    this->curIdx = 0;   //
+    this->maxIdx = res->getSize();
+    resourceFin = true;
+
+    for(int i = 0 ; i < MAX_CAPURES - 1 ;i++)
+    {
+        img[i+1] = res->getData(i, (index+i));
+    }
+
+    // update image
+    drawImg(-1,0,0,false,false);
+
+}
+
+
+
+void MainWindow::drawImg(int idx,int x, int y, bool result, bool capture)
+{
+
     static int cnt = 1;
     static int size[][2] =
     {
@@ -111,30 +133,40 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
         {D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11},
         {D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11},
     };
+    bool shift = false;
 
-    static Mat img[MAX_CAPURES];
     static QLabel * lb[MAX_CAPURES] =
     {
         ui->capturedImg1, ui->capturedImg2, ui->capturedImg3, ui->capturedImg4, ui->capturedImg5,
     };
 
-	if(shift == true)
+    if(capture == true)
 	{
 		img[0] = this->camTh->getCapturedImg();
 		cv::cvtColor(img[0], img[0], CV_BGR2RGB);
 	}
-
-    if(0 <= idx && idx < MAX_CAPURES)
+    else
     {
-        if(result == true)
+        if(0 <= idx && idx < MAX_CAPURES)
         {
-            this->buzzerTh->playBonusUp();
-            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(0,255,0), 10);
-        }
-        else
-        {
-            this->buzzerTh->playWrongMelody();
-            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(255,0,0), 10);
+            if(result == true)
+            {
+                this->buzzerTh->playBonusUp();
+                shift = true;
+
+
+                cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(0,255,0), 10);
+
+
+                this->curIdx++;
+                QString s = QString::number(this->curIdx+1);
+                ui->curStep->setText(s);
+            }
+            else
+            {
+                this->buzzerTh->playWrongMelody();
+                cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(255,0,0), 10);
+            }
         }
     }
 
@@ -145,7 +177,7 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
         lb[i]->setPixmap(QPixmap::fromImage(QImage(img[i].data, img[i].cols, img[i].rows, img[i].step, QImage::Format_RGB888)));
     }
 
-	if(shift)
+    if(shift)
 	{
 		for(int i = MAX_CAPURES - 1; i > 0 ;i--)
 		{
@@ -177,3 +209,44 @@ void MainWindow::on_matchRateSlider_sliderMoved(int position)
     ui->currentRate->setText(s);
 }
 
+
+void MainWindow::on_ResetButton_clicked()
+{
+    this->curIdx = 0;
+}
+
+void MainWindow::on_leftButton_clicked()
+{
+    if(resourceFin == false)    return;
+
+    this->viewIdx--;
+    if(viewIdx < 0 )
+    {
+        viewIdx = 0;
+    }
+    updateLowerUI();
+}
+
+void MainWindow::on_rightButton_clicked()
+{
+    if(resourceFin == false)    return;
+
+    this->viewIdx++;
+    if(viewIdx > MAX_CAPURES - 1)
+    {
+        viewIdx = MAX_CAPURES - 1;
+    }
+    updateLowerUI();
+}
+
+void MainWindow::updateLowerUI()
+{
+    int index;
+    for(int i = 0 ; i < MAX_CAPURES - 1 ;i++)
+    {
+        img[i+1] = res->getData(i+viewIdx, &index);
+    }
+
+    // update image
+    drawImg(-1,0,0,false,false);
+}

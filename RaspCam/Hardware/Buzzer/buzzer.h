@@ -20,6 +20,7 @@ class Buzzer : public QThread
 
 public:
     Buzzer();
+    ~Buzzer();
 
     void addNote(int tone, int beat);
     void instantNote(int tone, int beat);

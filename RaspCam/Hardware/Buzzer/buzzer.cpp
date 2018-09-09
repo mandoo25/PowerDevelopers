@@ -12,7 +12,6 @@ Buzzer::Buzzer()
 
     if(softToneCreate(BuzPin) == -1){
         qDebug() << "setup softTone failed !";
-
     }
 
     this->pollingPeriod = 1;
@@ -35,7 +34,7 @@ bool Buzzer::isEnabled()
 
 void Buzzer::close()
 {
-
+    pinMode(BuzPin, INPUT);
 }
 
 void Buzzer::addNote(int tone, int beat)
@@ -169,12 +168,17 @@ void Buzzer::playGetStartMelody()
     this->addNote(REST,16);
 }
 
+Buzzer::~Buzzer()
+{
+    this->close();
+}
+
 void Buzzer::run()
 {
     int size;
     int tone;
     int beat;
-
+/*
     this->playGetCoinMelody();
     this->playGetCoinMelody();
     this->playGetCoinMelody();
@@ -194,7 +198,13 @@ void Buzzer::run()
     this->addNote(REST,4);
 
     this->playBubbleBubble();
+*/
+    this->playGetCoinMelody();
+    this->addNote(REST,1);
+    this->addNote(REST,1);
 
+    this->playBonusUp();
+    this->addNote(REST,4);
 
     while(!this->_exit)
     {
@@ -221,6 +231,8 @@ void Buzzer::run()
             msleep(this->pollingPeriod);
         }
     }
+
+    this->close();
 }
 
 

@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     Network/parserTask.cpp \
     Network/tcp_sock.cpp \
     Hardware/Buzzer/buzzer.cpp \
-    Hardware/Key/key.cpp
+    Hardware/Key/key.cpp \
+    Resource/resource.cpp
 
 HEADERS  += mainwindow.h \
     Camera/camera.h \
@@ -41,7 +42,8 @@ HEADERS  += mainwindow.h \
     Network/tcp_sock.h \
     Hardware/Buzzer/tones.h \
     Hardware/Buzzer/melody.h \
-    Hardware/Key/key.h
+    Hardware/Key/key.h \
+    Resource/resource.h
 
 FORMS    += mainwindow.ui
 
