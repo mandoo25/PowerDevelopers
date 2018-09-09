@@ -30,6 +30,9 @@ public:
     void playBonusUp();
     void playBubbleBubble();
     void playWrongMelody();
+    void playCaptureMelody();
+
+    void playCaptureResultOKMelody();
 
     void playGetStartMelody();
 

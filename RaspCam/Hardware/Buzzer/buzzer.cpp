@@ -159,6 +159,20 @@ void Buzzer::playWrongMelody()
     this->addNote(REST,16);
 }
 
+void Buzzer::playCaptureMelody()
+{
+    this->addNote(tones[4][G],32);
+    this->addNote(REST,32);
+}
+
+void Buzzer::playCaptureResultOKMelody()
+{
+    this->addNote(tones[5][G],32);
+    this->addNote(REST,32);
+    this->addNote(tones[5][G],32);
+    this->addNote(REST,32);
+}
+
 void Buzzer::playGetStartMelody()
 {
     for(unsigned int i = 0 ; i < sizeof(getStar)/(sizeof(getStar[0])) ; i++)
@@ -199,13 +213,14 @@ void Buzzer::run()
 
     this->playBubbleBubble();
 */
+    /*
     this->playGetCoinMelody();
     this->addNote(REST,1);
     this->addNote(REST,1);
 
     this->playBonusUp();
     this->addNote(REST,4);
-
+*/
     while(!this->_exit)
     {
         size = this->getSize();

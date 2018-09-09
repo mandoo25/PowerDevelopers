@@ -37,6 +37,7 @@ private slots:
     void on_matchRateSlider_sliderMoved(int position);
 	
 	void updateIPResult();
+
     void updateResource();
 
     void on_externalButton_pressed();
@@ -54,7 +55,7 @@ private:
     Buzzer * buzzerTh;
     Key * keyTh;
 
-    void drawImg(int idx,int x, int y, bool result, bool shift);
+    void drawImg(int idx,int x, int y, bool result, bool capture);
 
     void updateLowerUI();
 

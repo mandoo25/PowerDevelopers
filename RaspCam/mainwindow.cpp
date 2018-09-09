@@ -13,9 +13,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     // set titleless window
-    this->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::Popup);
+    // this->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::Popup);
 
-    //this->setWindowFlags(Qt::Popup);
+
+    this->setWindowFlags(Qt::Popup);
     res = new Resource();
 
 
@@ -26,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // init nework
     this->netTh = new Network(D_NETWORK_SLEEP_MSEC,res);
-    // connect(this->netTh, SIGNAL(updateRawImg()), this, SLOT(getRawImg()));
+
     connect(this, SIGNAL(updateRawImgFin()), this->netTh, SLOT(sendRawImgData()));
 	connect(this->netTh, SIGNAL(imgProcessFin()), this, SLOT(updateIPResult()));
     connect(this->netTh, SIGNAL(resourceUpdateFin()), this, SLOT(updateResource()));
@@ -69,13 +70,23 @@ void MainWindow::getRawImg()
 {
     int size;
 	uchar * data;
-	
-	data = this->camTh->getCapturedRawImg(&size);  	
-	
-    this->netTh->setRawImgData(data, size, res->getimgIdx(this->curIdx));
 
+    data = this->camTh->getCapturedRawImg(&size);
 	
+
+
+    if(this->resourceFin == true)
+    {
+        this->netTh->setRawImgData(data, size, res->getimgIdx(this->curIdx));
+    }
+    else
+    {
+        this->netTh->setRawImgData(data, size, this->curIdx);
+    }
+
+
     emit updateRawImgFin();
+
 }
 
 void MainWindow::streamImg()
@@ -144,6 +155,7 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool capture)
 	{
 		img[0] = this->camTh->getCapturedImg();
 		cv::cvtColor(img[0], img[0], CV_BGR2RGB);
+        qDebug() << "capture";
 	}
     else
     {
@@ -151,7 +163,8 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool capture)
         {
             if(result == true)
             {
-                this->buzzerTh->playBonusUp();
+                this->buzzerTh->playCaptureResultOKMelody();
+
                 shift = true;
 
 
@@ -161,6 +174,7 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool capture)
                 this->curIdx++;
                 QString s = QString::number(this->curIdx+1);
                 ui->curStep->setText(s);
+
             }
             else
             {
@@ -189,6 +203,8 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool capture)
 
 void MainWindow::on_captureButton_clicked()
 {
+    qDebug() << "Capture Button Pressed!!";
+    this->buzzerTh->playCaptureMelody();
     this->getRawImg();
     this->drawImg(-1,0,0, false, true);
 
@@ -196,7 +212,7 @@ void MainWindow::on_captureButton_clicked()
 
 void MainWindow::on_externalButton_pressed()
 {
-    this->buzzerTh->playGetCoinMelody();
+    this->buzzerTh->playCaptureMelody();
 
     this->getRawImg();
     this->drawImg(-1,0,0, false, true);
