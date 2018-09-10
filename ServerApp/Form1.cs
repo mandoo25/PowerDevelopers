@@ -254,6 +254,7 @@ namespace EfficientApp
         private Label label2;
         private TextBox textBox1;
         private Button DirSelect;
+        private Button DBTest;
         private Stopwatch stopWatch = new Stopwatch();
 
         //		C# is a multi-threaded language, unlike VB6. Because of this, one must be careful
@@ -467,6 +468,7 @@ namespace EfficientApp
             this.DirSelect = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.DBTest = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.cogRecordDisplay1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PortNumberBox)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -636,11 +638,21 @@ namespace EfficientApp
             this.textBox1.Size = new System.Drawing.Size(288, 21);
             this.textBox1.TabIndex = 0;
             this.textBox1.Text = logBackupPath;
+            // DBTest
+            // 
+            this.DBTest.Location = new System.Drawing.Point(513, 60);
+            this.DBTest.Name = "DBTest";
+            this.DBTest.Size = new System.Drawing.Size(75, 23);
+            this.DBTest.TabIndex = 14;
+            this.DBTest.Text = "DB Test";
+            this.DBTest.UseVisualStyleBackColor = true;
+            this.DBTest.Click += new System.EventHandler(this.DBTest_Click);
             // 
             // Form1
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
             this.ClientSize = new System.Drawing.Size(959, 633);
+            this.Controls.Add(this.DBTest);
             this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.OutputTextBox);
@@ -1375,7 +1387,7 @@ namespace EfficientApp
             MySqlDataReader reader;
             string value_str = null;
 
-            sql = "SELECT WorkItem" + reqCmd.item_id + " from producttable WHERE Product='" + reqCmd.product_str + "'";
+            sql = "SELECT " + reqCmd.product_str + " from producttable WHERE WorkItemID='" + reqCmd.item_id + "'";
             cmd = new MySqlCommand(sql, mySqlConn);
 
             cmd.ExecuteNonQuery();
@@ -1404,15 +1416,30 @@ namespace EfficientApp
                     value_str = reader.GetString(0);
                 }
                 reader.Close();
-            }
 
-            if (value_str.Equals(respAck.data))
-            {
-                rtn = true;
-            }
-            else
-            {
-                rtn = false;
+                if (reqCmd.item_id == 111)
+                {
+                    if(value_str.Substring(0,4).Equals(respAck.data.Substring(0,4)))
+                    {
+                        rtn = true;
+                    }
+                    else
+                    {
+                        rtn = false;
+                    }
+
+                }
+                else
+                {
+                    if (value_str.Equals(respAck.data))
+                    {
+                        rtn = true;
+                    }
+                    else
+                    {
+                        rtn = false;
+                    }
+                }
             }
 
             return rtn;
@@ -1547,6 +1574,35 @@ namespace EfficientApp
 
             textBox1.Text = dialog.SelectedPath;
 
+        }
+
+        private void DBTest_Click(object sender, EventArgs e)
+        {
+            int count = 0;
+            MySqlConnection mySqlConn;
+            string MyConString = "Server=10.1.31.105; Port=3308; Database=k595np; Uid=root; Password=root; SslMode=none; charset=utf8";
+            mySqlConn = new MySqlConnection(MyConString);
+            mySqlConn.Open();            
+            
+            string sql = "SELECT * from process WHERE Type='" + "3029C003AA" + "'" + " AND Process='" + "F2" + "'";
+            MySqlCommand cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            MySqlDataReader reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                reader.Read();
+
+                for(int i=3; i<reader.VisibleFieldCount; i++)
+                {                    
+                    if (reader.IsDBNull(i) != true && reader.GetInt32(i) != 0)
+                    {
+                        count++;
+                    }
+                }                
+            }
+            reader.Close();
         }
     }
 }
