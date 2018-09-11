@@ -8,11 +8,12 @@
 extern int transfer_data_main(void);
 extern void setNetworkHandler(Network* net);
 
-Network::Network(unsigned int msecPollingPeriod)
+Network::Network(unsigned int msecPollingPeriod, Resource * res)
 {
     this->pollingPeriod = msecPollingPeriod;
     this->_exit = false;
 
+    this->res = res;
 	
     // plz write somthing want to initialize
     setNetworkHandler(this);
@@ -48,9 +49,11 @@ void Network::run()
 
 }
 
-void Network::setRawImgData(uchar * data)
+void Network::setRawImgData(uchar * data, int size, int index)
 {
     this->rawDataImg = data;
+    this->rawDataImgSize = size;
+    this->rawDataIndex = index;
 }
 
 uchar * Network::getRawImgData(void)
