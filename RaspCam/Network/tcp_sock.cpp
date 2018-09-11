@@ -94,10 +94,9 @@ int tcp_client::conn(string address , int port)
 
 bool tcp_client::send_data(jobInfo_t *data)
 {
-    unsigned int length = data->txPackInfo->image_size+data->txPackInfo->order_size+D_HEADER_SIZE;
-    printf("imagesize: %x,  ordersize: %d\n", data->txPackInfo->image_size, data->txPackInfo->order_size);
+    unsigned int length = data->txPackInfo->image_size+data->txPackInfo->order_size+D_HEADER_SIZE;    
 	printf("total length: %d\n", length);
-    length = 100000;
+    //length = 100000;
 	unsigned int remainedLen = length;
 	unsigned int sentDataPos =0;
     //Send some data

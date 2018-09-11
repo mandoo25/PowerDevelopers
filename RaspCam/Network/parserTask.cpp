@@ -17,6 +17,8 @@
 #include "parserInfo.h"
 #include "tcp_sock.h"
 #include "network.h"
+#include "parsemysql.h"
+
 
 using namespace std;
 
@@ -24,7 +26,7 @@ using namespace std;
 queue<jobInfo_t *> job_list;
 //mutex mutex_;
 //condition_variable cond_;
-static jobInfo_t *currentJobData;
+static jobInfo_t *currentJobData = nullptr;
 static char order_num[128];
 static tcp_client comm;
 
@@ -47,6 +49,10 @@ extern int transfer_data_main(void)
     //cin>>host;
 
     host = "10.1.31.105";
+
+    char *ordernum = "3029C003AA";
+    char *process = "M1";
+    //getProcessSeqFromDB(ordernum, process);
 
 #if 0
 	//connect to host
@@ -106,13 +112,9 @@ extern int transfer_data_main(void)
             return -1;
         }
 
-        currentJobData =(jobInfo_t *)job_list.front(); //have to fix here!
+        currentJobData =(jobInfo_t *)job_list.front();
 
 		//send some data
-
-        printf("beforeSend::cmd:type: %d\n", currentJobData->txPackInfo->cmd_type);
-        printf("beforeSend::action:type: %d\n", currentJobData->txPackInfo->action_type);
-        printf("beforeSend::img:size: %d\n", currentJobData->txPackInfo->image_size);
         if(!comm.send_data((jobInfo_t *)currentJobData))
 		{
 			cout << "send falure" << endl;
@@ -143,8 +145,8 @@ int receiveFunc(char *data)
 	bool ret;
 	cout << "[call]" << __FUNCTION__ <<endl;
 
-    packInfo_rx *info = (packInfo_rx*)malloc(sizeof(char)*5*1024);
-#if 1
+    packInfo_rx *info = (packInfo_rx*)malloc(sizeof(packInfo_rx));
+
 	ret = parsePacket(info, data);
 	if(ret != true)
 	{
@@ -159,8 +161,9 @@ int receiveFunc(char *data)
 	printf("info->process_num: %x\n", info->process_num);
 	printf("info->coord_x: %d\n", info->coordinate_x);
 	printf("info->coord_y: %d\n", info->coordinate_y);
-	printf("info->data_size: %d\n", info->data_size);
-    //printf("info->res_data:%d %d %d %d\n", info->data[0],info->data[1],info->data[2],info->data[3] );
+	printf("info->data_size: %d\n", info->data_size);    
+    printf("info->data: %s\n", info->data);
+    printf("__________________________\n");
 
 	if(info->cmd_type == CMD_TYPE_ACK)
 	{
@@ -168,33 +171,31 @@ int receiveFunc(char *data)
 		{
 			if(info->item_id == WORK_ORDER)
 			{
-				strncpy(order_num, (const char*)info->data, info->data_size);
+                strncpy(order_num, info->data, info->data_size);
 			}
-
 			/* do something * */
+            printf("current Model num of order: %s\n", order_num);
+            netHander->setIpResults(200, 300, 1);
 
-            printf(":::::: %p\n", currentJobData);
             deleteJob(currentJobData);
 		}
 	}
 	else if(info->cmd_type == CMD_TYPE_NACK)
 	{
 		cout <<"received Error from server." <<endl;
+        netHander->setIpResults(200, 300, 0);
+
+        deleteJob(currentJobData);
 	}
 	else
 	{
+        /*in case of unkown cmd */
 	}
-#endif
 
-#if 1
-//    Network *net = Network::getInstance();
-    netHander->setIpResults(200, 300, 1);
-    emit netHander->imgProcessFin();
-
-#endif
-    deleteJob(currentJobData);
 
 	free(info);
+
+    emit netHander->imgProcessFin();
     //temporarily call
     comm.close_sock();
 
@@ -227,11 +228,9 @@ int buildPacket(packInfo_tx *info)
 	printf("work: %d\n", info->item_id);
 	printf("size: %d\n", info->image_size);
 
-    jobInfo_t *newJob = (jobInfo_t *)malloc(sizeof(jobInfo_t));
-	//memset(newJob.order_num, 0, sizeof(newJob.order_num));
+    jobInfo_t *newJob = (jobInfo_t *)malloc(sizeof(jobInfo_t));	
 	newJob->txData = rq_data;
-    newJob->txPackInfo = (packInfo_tx *)info;
-    //printf("img:: size : %d\n", newJob->txPackInfo->image_size);
+    newJob->txPackInfo = (packInfo_tx *)info;    
 	newJob->callback = (callbackFunc)receiveFunc;
 	//add job
 	appendJob(newJob);
@@ -256,8 +255,9 @@ void deleteJob(jobInfo_t *job)
 {
 	cout << "[pop] used job" <<endl;
 	job_list.pop();
-	free(job->txData);
-	free(job);
+    if(job->txData != nullptr){ free(job->txData); job->txData = nullptr; }
+    if(job->txPackInfo != nullptr){ free(job->txPackInfo); job->txPackInfo = nullptr; }
+    if(job != nullptr){ free(job); job = nullptr; }
 }
 
 bool parsePacket(packInfo_rx *info, char *data)
@@ -274,7 +274,7 @@ bool parsePacket(packInfo_rx *info, char *data)
 		memcpy(&info->coordinate_y, &rs_data[9], sizeof(char)*4);
 		info->matching_rate = rs_data[13];
 		info->data_size = rs_data[14];
-		memcpy(&info->data, &rs_data[15], sizeof(char)*info->data_size);
+        memcpy(info->data, &rs_data[15], sizeof(char)*info->data_size);
 	}
 	else return false;
 

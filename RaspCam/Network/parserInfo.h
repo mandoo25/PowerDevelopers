@@ -9,7 +9,8 @@
 #define PARSERINFO_H_
 
 #include <iostream>
-#include <string>
+//#include <string>
+#include <cstring>
 
 using namespace std;
 
@@ -41,7 +42,7 @@ typedef struct revPackinfo {
 	unsigned int coordinate_y;
 	unsigned char matching_rate;
 	unsigned char data_size;
-	char          *data;
+    char          data[128];
 
 
 }packInfo_rx;
