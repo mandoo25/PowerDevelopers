@@ -46,7 +46,7 @@ private:
 
     static Network net_instance;
     Resource * res;
-	
+    void setRawImgDataSize(int size);
 	
 
 private slots:

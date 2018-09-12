@@ -30,6 +30,11 @@ static jobInfo_t *currentJobData = nullptr;
 static char order_num[128];
 static tcp_client comm;
 
+//public handle
+packInfo_tx proc_seq_table[D_MAX_PROC_SEQ];
+unsigned int tableCounter;
+
+
 int appendJob(jobInfo_t *job);
 void deleteJob(jobInfo_t *job);
 extern int buildPacket(packInfo_tx *info);
@@ -38,7 +43,7 @@ bool verifyPackInfo(packInfo_rx *info);
 void test_makeRAWdata(char *img, unsigned int *size);
 Network *netHander;
 
-extern int transfer_data_main(void)
+extern int transfer_data_proc(void)
 {
 
 	int rval;
@@ -49,10 +54,6 @@ extern int transfer_data_main(void)
     //cin>>host;
 
     host = "10.1.31.105";
-
-    char *ordernum = "3029C003AA";
-    char *process = "M1";
-    //getProcessSeqFromDB(ordernum, process);
 
 #if 0
 	//connect to host
@@ -340,6 +341,25 @@ void test_makeRAWdata(char *img,  unsigned int *size)
 #endif
 
 }
+
+
+extern int transfer_proc_init(void)
+{
+    int ret = -1;
+
+
+
+    //memset(proc_seq_table, 0, sizeof(proc_seq_table)); //reset buffer to restore proc sequence table
+    //tableCounter = 0;
+
+    char *ordernum = "3029C003AA";
+    char *process = "M1";
+    ret = getProcessSeqFromDB(ordernum, process);
+
+    return ret;
+}
+
+
 /*
  *
  * switch(info.action_type)

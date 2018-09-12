@@ -30,46 +30,6 @@ int mysql_connect(void)
     }
     else { cout << "Database connection successful" <<endl; }
 
-#if 0
-    char *sql_query_text = "SELECT * FROM process WHERE Type='3029C003AA' AND Process='F2'";
-
-    //Send query to database
-    query_state = mysql_query(connection, sql_query_text);
-    if(query_state != 0)
-    {
-        cout << " mysql_query failure" <<endl;
-        return -1;
-    }
-
-
-    // store result
-    result = mysql_store_result(connection);
-    if (result != NULL)
-    {
-        //Get the number of columns
-        int num_rows = mysql_num_rows(result); //row
-        int num_fields = mysql_num_fields(result); //column
-        cout << "field num: "<< num_fields <<endl;
-
-        MYSQL_ROW row;			//An array of strings
-        while( (row = mysql_fetch_row(result)) )
-        {
-            static int idx =0;
-            do{
-                char *value_int = row[idx];
-                char *value_string = row[idx];
-                if(value_string == nullptr) break;
-
-                printf( "Got value ::%d, %s\n", *value_int, value_string);
-                idx++;
-            }while(num_fields > idx);
-
-
-        }
-        mysql_free_result(result);
-    }
-
-#endif
     return 0;
 }
 
@@ -156,7 +116,12 @@ int getProcessSeqFromDB(const char *ordernum, const char *process)
                 //printf( "process Seq value ::%s\n", value_string);
 
                 unsigned int procnum = (unsigned int)atoi(value_string);
-                getWorkitemsFromDB(connection, procnum);
+                int workitem = getWorkitemsFromDB(connection, procnum);
+                if(workitem != -1){
+          //          proc_seq_table[tableCounter].action_type = procnum;
+          //          proc_seq_table[tableCounter].item_id = workitem;
+          //          tableCounter++;
+                }
 
                 idx++;
             }while(num_fields > idx);

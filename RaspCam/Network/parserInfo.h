@@ -11,10 +11,13 @@
 #include <iostream>
 //#include <string>
 #include <cstring>
+//#include "network.h"
+
 
 using namespace std;
 
 #define D_HEADER_SIZE 11
+#define D_MAX_PROC_SEQ 255
 
 typedef int (*callbackFunc)(void *param);
 
@@ -97,9 +100,13 @@ typedef struct jobinfo
 }jobInfo_t;
 
 
+
+
 extern bool setSendRequest(packInfo_tx *sInfo);
 extern void getDevOrderNumber(char *num);
 extern int buildPacket(packInfo_tx *info);
-
+//extern int transfer_proc_init(void);
+//extern int transfer_data_proc(void);
+//extern void setNetworkHandler(Network* net);
 
 #endif /* PARSERINFO_H_ */

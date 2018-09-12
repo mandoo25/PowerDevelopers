@@ -5,8 +5,10 @@
 #include "tcp_sock.h"
 
 
-extern int transfer_data_main(void);
 extern void setNetworkHandler(Network* net);
+extern int transfer_proc_init(void);
+extern int transfer_data_proc(void);
+
 
 Network::Network(unsigned int msecPollingPeriod, Resource * res)
 {
@@ -33,14 +35,14 @@ void Network::run()
     qDebug() << "execute Network func" << endl;
 
     //initialize func
-    //
+    transfer_proc_init();
 
     while(!this->_exit)
     {
 
         // interrupt : updateRawImg
         // emit updateRawImg();        
-        transfer_data_main();
+        transfer_data_proc();
 
         //emit imgProcessFin();
         // sleep msec
