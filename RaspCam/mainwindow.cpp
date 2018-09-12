@@ -16,12 +16,12 @@ MainWindow::MainWindow(QWidget *parent) :
     // this->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::Popup);
 
 
-    this->setWindowFlags(Qt::Popup);
+    // this->setWindowFlags(Qt::Popup);
     res = new Resource();
 
 
     // init camera
-    this->camTh = new Camera(D_CAMERA_POLLING_MSEC, D_CAMEARA_CAPTURE_WIDTH, D_CAMEARA_CAPTURE_HEIGHT);
+    this->camTh = new Camera(33, D_CAMEARA_CAPTURE_WIDTH, D_CAMEARA_CAPTURE_HEIGHT);
     connect(this->camTh, SIGNAL(captureImg()), this, SLOT(streamImg()));
     this->camTh->start();
 
@@ -56,8 +56,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->portcb->addItem("8080");
 
-    ui->factorycb->addItem("main 8");
+    for(int i = 1 ; i <= 5 ; i++)
+    {
+        QString s = "M";
+        s.append(QString::number(i));
+        ui->factorycb->addItem(s);
+    }
 
+    for(int i = 1 ; i <= 3 ; i++)
+    {
+        QString s = "F";
+        s.append(QString::number(i));
+        ui->factorycb->addItem(s);
+    }
+
+    // setting
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow()
@@ -223,6 +237,8 @@ void MainWindow::on_matchRateSlider_sliderMoved(int position)
     QString s = QString::number(position);
     s.append("%");
     ui->currentRate->setText(s);
+
+    this->setImgMatchRate();
 }
 
 
@@ -265,4 +281,110 @@ void MainWindow::updateLowerUI()
 
     // update image
     drawImg(-1,0,0,false,false);
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    // qDebug() << index;
+    bool camEnable = index == 0 ? false : true;
+
+    this->camTh->enableStreaming(camEnable);
+
+}
+
+void MainWindow::setIpAddress() // test ok
+{
+    static QComboBox * order[] =
+    {
+        ui->ipcb1, ui->ipcb2, ui->ipcb3, ui->ipcb4
+    };
+
+    if(this->netTh == NULL) return;
+
+    IP.clear();
+
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        IP.append(order[i]->currentText());
+        if(i != 3)
+        {
+            IP.append(".");
+        }
+    }
+
+    // qDebug() << IP;
+
+    tempQs = IP.toLatin1();
+
+    netTh->setServerIpAddress(tempQs.data());
+
+}
+
+void MainWindow::setPort()  // test ok
+{
+    if(this->netTh == NULL) return;
+
+    int port = this->ui->portcb->currentText().toInt();
+
+    // qDebug() << port;
+
+    netTh->setPort(port);
+}
+
+void MainWindow::setImgMatchRate()  // test ok
+{
+    if(this->netTh == NULL) return;
+    int pos = this->ui->matchRateSlider->sliderPosition();
+
+    // qDebug() << pos;
+
+    netTh->setImgRate(pos);
+}
+
+void MainWindow::setProcess()   // test ok
+{
+    if(this->netTh == NULL) return;
+
+    process.clear();
+
+    process.append(ui->factorycb->currentText());
+
+    // qDebug() << process;
+
+    tempQs = process.toLatin1();
+
+    netTh->setProcess(tempQs.data());
+}
+
+
+
+void MainWindow::on_factorycb_currentTextChanged(const QString &arg1)
+{
+    // qDebug() << arg1;
+    this->setProcess();
+}
+
+void MainWindow::on_ipcb1_currentIndexChanged(const QString &arg1)
+{
+    this->setIpAddress();
+}
+
+void MainWindow::on_ipcb2_currentIndexChanged(const QString &arg1)
+{
+    this->setIpAddress();
+}
+
+void MainWindow::on_ipcb3_currentIndexChanged(const QString &arg1)
+{
+    this->setIpAddress();
+}
+
+void MainWindow::on_ipcb4_currentIndexChanged(const QString &arg1)
+{
+    this->setIpAddress();
+}
+
+void MainWindow::on_portcb_currentIndexChanged(const QString &arg1)
+{
+    this->setPort();
 }

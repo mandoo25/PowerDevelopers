@@ -88,17 +88,6 @@ private:
 
     bool resourceFin;
 
-    void setIpAddress();
-    QString IP;
-    QByteArray tempQs; //temp data for QString -> char*
-
-    void setProcess();
-    QString process;
-
-    void setPort();
-    void setImgMatchRate();
-
-
 
 
 

@@ -63,6 +63,12 @@ uchar * Network::getRawImgData(void)
     return this->rawDataImg;
 }
 
+
+void Network::setRawImgDataSize(int size)
+{
+	this->rawDataImgSize = size;
+}
+
 /*
  * 1. setup init value all of them
  * 2. check ip addr and port number
@@ -119,74 +125,5 @@ void Network::setIpResults(int x, int y, bool res)
 }
 
 
-void Network::setServerIpAddress(char * ip)
-{
-    // 192.168.000.001 = 3*4 + 3 = 12 + 3 = 15 + 1(NULL)
-    if(strlen(ip) > 15) return;
-    this->settingMutex.lock();
-    strcpy(this->ipAddress,ip);
-    this->settingMutex.unlock();
-}
 
-char * Network::getServerIpAddress()
-{
-    // wait
-    this->settingMutex.lock();
-    this->settingMutex.unlock();
-
-    return this->ipAddress;
-}
-
-// port
-void Network::setPort(int port)
-{
-    this->settingMutex.lock();
-    this->port = port;
-    this->settingMutex.unlock();
-}
-
-int Network::getPort()
-{
-    // wait
-    this->settingMutex.lock();
-    this->settingMutex.unlock();
-
-    return this->port;
-}
-
-// process
-void Network::setProcess(char * proc)
-{
-    // process m1, m2 ...
-    if(strlen(proc) != 2) return;
-    this->settingMutex.lock();
-    strcpy(this->process,proc);
-    this->settingMutex.unlock();
-}
-
-char * Network::getProcess()
-{
-    // wait
-    this->settingMutex.lock();
-    this->settingMutex.unlock();
-
-    return this->process;
-}
-
-// rate : image match rate
-void Network::setImgRate(int rate)
-{
-    this->settingMutex.lock();
-    this->imgMatchRate = rate;
-    this->settingMutex.unlock();
-}
-
-int Network::getImgRate(void)
-{
-    // wait
-    this->settingMutex.lock();
-    this->settingMutex.unlock();
-
-    return this->imgMatchRate;
-}
 
