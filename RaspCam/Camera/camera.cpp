@@ -7,6 +7,7 @@ Camera::Camera(unsigned int msecPollingPeriod, unsigned int width, unsigned int 
 {
     this->_exit = false;
     this->pollingPeriod = msecPollingPeriod;
+    this->_enabled = false;
     // this->capturedImg = NULL;
 
     initCamera(width, height);
@@ -103,6 +104,11 @@ uchar * Camera::getCapturedRawImg(int * size)
 }
 
 
+void Camera::enableStreaming(bool enable)
+{
+    this->_enabled = enable;
+}
+
 void Camera::run()
 {
     cv::Mat img;
@@ -110,15 +116,17 @@ void Camera::run()
     while(!this->_exit)
     {
         // qDebug() << "Cam Th";
+        if(_enabled == true)
+        {
+            cam.grab();
+            cam.retrieve(img);
 
-        cam.grab();
-        cam.retrieve(img);
+            // cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH, D_CAMERA_DISPLAYED_HEIGHT), 0, 0, CV_INTER_LINEAR);
 
-        // cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH, D_CAMERA_DISPLAYED_HEIGHT), 0, 0, CV_INTER_LINEAR);
-
-        // image update
-        this->updateImg(img);
-        emit captureImg();   // stream img
+            // image update
+            this->updateImg(img);
+            emit captureImg();   // stream img
+        }
 
         msleep(this->pollingPeriod);
     }

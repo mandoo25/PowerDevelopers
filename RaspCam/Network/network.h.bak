@@ -34,46 +34,19 @@ public:
 
     void setIpResults(int x, int y, bool res);
 
-    // user setting
-    // ip address
-    void setServerIpAddress(char * ip);
-    char * getServerIpAddress();
-
-    // port
-    void setPort(int port);
-    int getPort();
-
-    // process
-    void setProcess(char * proc);
-    char * getProcess();
-
-    // rate : image match rate
-    void setImgRate(int rate);
-    int getImgRate(void);
-
-
 private:
     unsigned int pollingPeriod;
     bool _exit;
     bool _enabled;
     void run();
     
-    // user setting
-    char ipAddress[16];
-    char process[3];
-    int port = 8080;
-    int imgMatchRate = 60;
-    QMutex settingMutex;
-
-
-    // image informations
 	uchar * rawDataImg;
 	int rawDataImgSize;
     int rawDataIndex;
 
     static Network net_instance;
     Resource * res;
-	
+    void setRawImgDataSize(int size);
 	
 
 private slots:

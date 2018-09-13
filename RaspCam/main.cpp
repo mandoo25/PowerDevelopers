@@ -12,10 +12,12 @@ int main(int argc, char *argv[])
 
     MainWindow w;
 
-    w.setAttribute(Qt::WA_DeleteOnClose);
-    w.show();
+    // w.setAttribute(Qt::WA_DeleteOnClose);
+    // w.setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowCloseButtonHint | Qt::Popup);
+    w.setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowCloseButtonHint);
+    // w.show();
 
-    //w.showFullScreen();
+    w.showFullScreen();
 
     // qDebug() << "end???";
 
