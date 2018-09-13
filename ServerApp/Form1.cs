@@ -1127,6 +1127,141 @@ namespace EfficientApp
             return respAck;
         }
 
+        public RespAck CogActJudgement(ref ReqCmd reqCmd)
+        {
+            RespAck respAck = new RespAck();
+            string sql;
+            MySqlCommand cmd;
+            string process = null;
+
+            respAck.action_type = reqCmd.action_type;
+            respAck.item_id = reqCmd.item_id;
+            respAck.cell_number = reqCmd.cell_number;
+            respAck.process_number = reqCmd.process_number;
+            respAck.data_size = 0;
+
+            sql = "SELECT Process FROM processnum WHERE Value=" + string.Format("{0}",reqCmd.process_number);
+            cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            bool ResultExist = false;
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            if(reader.HasRows)
+            {
+                reader.Read();
+                process = reader.GetString(0);
+                ResultExist = true;
+            }
+            reader.Close();
+
+            if (!ResultExist)
+            {
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.info, string.Format("Wrong Process Num!! : {0}", reqCmd.process_number));
+
+                return respAck;
+            }
+
+            sql = "SELECT * from process WHERE Type='" + reqCmd.product_str + "'" + " AND Process='" + process + "'";
+            cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            int seqCount = 0;
+            int[] seqArr = new int[255];
+
+            ResultExist = false;
+            reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                ResultExist = true;
+
+                reader.Read();
+
+                for(int i=2; i<reader.VisibleFieldCount; i++)
+                {                    
+                    if (reader.IsDBNull(i) != true && reader.GetInt32(i) != 0)
+                    {
+                        seqArr[seqCount] = reader.GetInt32(i);
+                        seqCount++;
+                    }
+                }                
+            }
+            reader.Close();
+
+            if(!ResultExist)
+            {
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.info, "Wrong Process!! : " + reqCmd.product_str + " " + process);
+
+                return respAck;
+            }
+
+            sql = "SELECT * from resultcheck WHERE SerialNumber='" + reqCmd.serial_str + "'";
+            cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            int resultCnt = 0;
+            int[] resultArr = new int[255];
+
+            ResultExist = false;
+            reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                ResultExist = true;
+
+                reader.Read();
+
+                for(int i=1; i<reader.VisibleFieldCount; i++)
+                {                    
+                    if (reader.IsDBNull(i) != true)
+                    {
+                        resultArr[resultCnt] = reader.GetInt32(i);
+                        resultCnt++;
+                    }
+                }                
+            }
+            reader.Close();
+
+            if(!ResultExist)
+            {
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.info, "Never Worked!! : " + reqCmd.serial_str);
+
+                return respAck;
+            }
+
+            bool check_ok = true;
+            for (int i = 0; i < seqCount; i++)
+            {
+                if(resultArr[seqArr[i]-1] == 0)
+                {
+                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                    print_log((byte)LogType.info, string.Format("Item was not checked!! : {0}", seqArr[i]));
+                    check_ok = false;
+                }                
+            }
+
+            if (check_ok)
+            {
+                print_log((byte)LogType.info, string.Format("Every Check Items are OK!"));
+                //MessageBox.Show(resultId);
+                UpdateGUI(string.Format("Every Check Items are OK!"));
+
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+            }
+            else
+            {
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.info, string.Format("At last one more check item remains."));
+            }
+
+            return respAck;
+        }
+
         public RespAck CogActBarcode2D(ReqCmd reqCmd)
         {
             RespAck respAck = new RespAck();
@@ -1318,6 +1453,10 @@ namespace EfficientApp
                                                     respAck = CogActExist(ref reqCmd);
                                                     break;
 
+                                                case (byte)ActionType.judgement:
+                                                    respAck = CogActJudgement(ref reqCmd);
+                                                    break;
+
                                                 default:
                                                     break;
                                             }
@@ -1371,7 +1510,8 @@ namespace EfficientApp
                             netStream.Write(responseBuffer, 0, responseBuffer.Length);                            
                             netStream.Flush();
 
-                            if(respAck.cmd_type == (byte)CmdType.CMD_TYPE_ACK && reqCmd.product_str != null && reqCmd.serial_str != null)
+                            if (respAck.cmd_type == (byte)CmdType.CMD_TYPE_ACK && reqCmd.product_str != null &&
+                                reqCmd.serial_str != null && reqCmd.action_type != (byte)ActionType.judgement)
                             {
                                 string result_detail;
                                 MySqlCommand cmd;
@@ -1411,12 +1551,12 @@ namespace EfficientApp
                                 
                                 cmd.ExecuteNonQuery();
 
-                                bool ReusleExist = false;
+                                bool ResultExist = false;
                                 MySqlDataReader reader = cmd.ExecuteReader();
-                                ReusleExist = reader.HasRows;
+                                ResultExist = reader.HasRows;
                                 reader.Close();
 
-                                if (!ReusleExist)
+                                if (!ResultExist)
                                 {
                                     sql = "INSERT INTO resultcheck (SerialNumber) VALUES(@SerialNum)";
                                     cmd = new MySqlCommand(sql, mySqlConn);
