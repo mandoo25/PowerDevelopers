@@ -9,11 +9,15 @@
 #define PARSERINFO_H_
 
 #include <iostream>
-#include <string>
+//#include <string>
+#include <cstring>
+//#include "network.h"
+
 
 using namespace std;
 
 #define D_HEADER_SIZE 11
+#define D_MAX_PROC_SEQ 255
 
 typedef int (*callbackFunc)(void *param);
 
@@ -41,7 +45,7 @@ typedef struct revPackinfo {
 	unsigned int coordinate_y;
 	unsigned char matching_rate;
 	unsigned char data_size;
-	char          *data;
+    char          data[128];
 
 
 }packInfo_rx;
@@ -85,6 +89,28 @@ typedef enum jobStatus
 	JS_NONE
 }jobStatus_t;
 
+typedef enum processNumber
+{
+    PS_M1 = 0x01,
+    PS_M2,
+    PS_M3,
+    PS_M4,
+    PS_M5,
+    PS_M6,
+    PS_M7,
+    PS_M8,
+    PS_M9,
+    PS_M10,
+
+    PS_F1,
+    PS_F2,
+    PS_F3,
+    PS_F4,
+    PS_F5,
+    PS_NONE
+
+}processNumber_t;
+
 typedef struct jobinfo
 {
 	char *txData;
@@ -96,9 +122,14 @@ typedef struct jobinfo
 }jobInfo_t;
 
 
+
+
 extern bool setSendRequest(packInfo_tx *sInfo);
 extern void getDevOrderNumber(char *num);
 extern int buildPacket(packInfo_tx *info);
-
+extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx);
+//extern int transfer_proc_init(void);
+//extern int transfer_data_proc(void);
+//extern void setNetworkHandler(Network* net);
 
 #endif /* PARSERINFO_H_ */

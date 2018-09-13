@@ -33,7 +33,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = RaspCam1.0.0
-DISTDIR = /home/pi/src/Prj/master/PowerDevelopers/RaspCam/.tmp/RaspCam1.0.0
+DISTDIR = /home/pi/src/master2/PowerDevelopers/RaspCam/.tmp/RaspCam1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1
 LIBS          = $(SUBLIBS) -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_tracking -lopencv_videoio -lraspicam_cv -lraspicam -lwiringPi -lwiringPiDev -lQt5Widgets -lQt5Gui -lQt5Core -lGLESv2 -lpthread 
@@ -53,18 +53,28 @@ SOURCES       = main.cpp \
 		Camera/camera.cpp \
 		Network/network.cpp \
 		Network/parserTask.cpp \
-		Network/tcp_sock.cpp moc_mainwindow.cpp \
+		Network/tcp_sock.cpp \
+		Hardware/Buzzer/buzzer.cpp \
+		Hardware/Key/key.cpp \
+		Resource/resource.cpp moc_mainwindow.cpp \
 		moc_camera.cpp \
-		moc_network.cpp
+		moc_network.cpp \
+		moc_buzzer.cpp \
+		moc_key.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
 		camera.o \
 		network.o \
 		parserTask.o \
 		tcp_sock.o \
+		buzzer.o \
+		key.o \
+		resource.o \
 		moc_mainwindow.o \
 		moc_camera.o \
-		moc_network.o
+		moc_network.o \
+		moc_buzzer.o \
+		moc_key.o
 DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/unix.conf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/linux.conf \
@@ -85,6 +95,8 @@ DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_eglfs_kms_support_private.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_gui.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_gui_private.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_multimedia.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_multimediawidgets.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_network.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_network_private.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_opengl.pri \
@@ -94,6 +106,12 @@ DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_platformsupport_private.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_printsupport.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_printsupport_private.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_qml.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_qmltest.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_quick.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_quickwidgets.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_script.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_scripttools.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_sql.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_sql_private.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_testlib.pri \
@@ -131,12 +149,19 @@ DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		Network/network.h \
 		Hardware/Buzzer/buzzer.h \
 		Network/parserInfo.h \
-		Network/tcp_sock.h main.cpp \
+		Network/tcp_sock.h \
+		Hardware/Buzzer/tones.h \
+		Hardware/Buzzer/melody.h \
+		Hardware/Key/key.h \
+		Resource/resource.h main.cpp \
 		mainwindow.cpp \
 		Camera/camera.cpp \
 		Network/network.cpp \
 		Network/parserTask.cpp \
-		Network/tcp_sock.cpp
+		Network/tcp_sock.cpp \
+		Hardware/Buzzer/buzzer.cpp \
+		Hardware/Key/key.cpp \
+		Resource/resource.cpp
 QMAKE_TARGET  = RaspCam
 DESTDIR       = 
 TARGET        = RaspCam
@@ -168,6 +193,8 @@ Makefile: RaspCam.pro /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++/qmake.c
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_eglfs_kms_support_private.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_gui.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_gui_private.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_multimedia.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_multimediawidgets.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_network.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_network_private.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_opengl.pri \
@@ -177,6 +204,12 @@ Makefile: RaspCam.pro /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++/qmake.c
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_platformsupport_private.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_printsupport.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_printsupport_private.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_qml.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_qmltest.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_quick.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_quickwidgets.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_script.pri \
+		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_scripttools.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_sql.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_sql_private.pri \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_testlib.pri \
@@ -233,6 +266,8 @@ Makefile: RaspCam.pro /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++/qmake.c
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_eglfs_kms_support_private.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_gui.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_gui_private.pri:
+/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_multimedia.pri:
+/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_multimediawidgets.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_network.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_network_private.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_opengl.pri:
@@ -242,6 +277,12 @@ Makefile: RaspCam.pro /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++/qmake.c
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_platformsupport_private.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_printsupport.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_printsupport_private.pri:
+/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_qml.pri:
+/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_qmltest.pri:
+/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_quick.pri:
+/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_quickwidgets.pri:
+/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_script.pri:
+/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_scripttools.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_sql.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_sql_private.pri:
 /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/modules/qt_lib_testlib.pri:
@@ -291,8 +332,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.h Camera/camera.h config.h Network/network.h Hardware/Buzzer/buzzer.h Network/parserInfo.h Network/tcp_sock.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mainwindow.cpp Camera/camera.cpp Network/network.cpp Network/parserTask.cpp Network/tcp_sock.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.h Camera/camera.h config.h Network/network.h Hardware/Buzzer/buzzer.h Network/parserInfo.h Network/tcp_sock.h Hardware/Buzzer/tones.h Hardware/Buzzer/melody.h Hardware/Key/key.h Resource/resource.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mainwindow.cpp Camera/camera.cpp Network/network.cpp Network/parserTask.cpp Network/tcp_sock.cpp Hardware/Buzzer/buzzer.cpp Hardware/Key/key.cpp Resource/resource.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents mainwindow.ui $(DISTDIR)/
 
 
@@ -319,25 +360,39 @@ benchmark: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_mainwindow.cpp moc_camera.cpp moc_network.cpp
+compiler_moc_header_make_all: moc_mainwindow.cpp moc_camera.cpp moc_network.cpp moc_buzzer.cpp moc_key.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_mainwindow.cpp moc_camera.cpp moc_network.cpp
+	-$(DEL_FILE) moc_mainwindow.cpp moc_camera.cpp moc_network.cpp moc_buzzer.cpp moc_key.cpp
 moc_mainwindow.cpp: Camera/camera.h \
 		config.h \
 		Network/network.h \
+		Resource/resource.h \
+		Hardware/Buzzer/buzzer.h \
+		Hardware/Buzzer/tones.h \
+		Hardware/Key/key.h \
 		mainwindow.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/master/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include mainwindow.h -o moc_mainwindow.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/master2/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include mainwindow.h -o moc_mainwindow.cpp
 
 moc_camera.cpp: config.h \
 		Camera/camera.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/master/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Camera/camera.h -o moc_camera.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/master2/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Camera/camera.h -o moc_camera.cpp
 
 moc_network.cpp: config.h \
+		Resource/resource.h \
 		Network/network.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/master/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Network/network.h -o moc_network.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/master2/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Network/network.h -o moc_network.cpp
+
+moc_buzzer.cpp: Hardware/Buzzer/tones.h \
+		Hardware/Buzzer/buzzer.h \
+		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/master2/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Buzzer/buzzer.h -o moc_buzzer.cpp
+
+moc_key.cpp: Hardware/Key/key.h \
+		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/master2/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Key/key.h -o moc_key.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -361,13 +416,21 @@ compiler_clean: compiler_moc_header_clean compiler_uic_clean
 main.o: main.cpp mainwindow.h \
 		Camera/camera.h \
 		config.h \
-		Network/network.h
+		Network/network.h \
+		Resource/resource.h \
+		Hardware/Buzzer/buzzer.h \
+		Hardware/Buzzer/tones.h \
+		Hardware/Key/key.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 mainwindow.o: mainwindow.cpp mainwindow.h \
 		Camera/camera.h \
 		config.h \
 		Network/network.h \
+		Resource/resource.h \
+		Hardware/Buzzer/buzzer.h \
+		Hardware/Buzzer/tones.h \
+		Hardware/Key/key.h \
 		ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o mainwindow.cpp
 
@@ -377,6 +440,7 @@ camera.o: Camera/camera.cpp Camera/camera.h \
 
 network.o: Network/network.cpp Network/network.h \
 		config.h \
+		Resource/resource.h \
 		Network/parserInfo.h \
 		Network/tcp_sock.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o network.o Network/network.cpp
@@ -384,12 +448,25 @@ network.o: Network/network.cpp Network/network.h \
 parserTask.o: Network/parserTask.cpp Network/parserInfo.h \
 		Network/tcp_sock.h \
 		Network/network.h \
-		config.h
+		config.h \
+		Resource/resource.h \
+		Network/parsemysql.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parserTask.o Network/parserTask.cpp
 
 tcp_sock.o: Network/tcp_sock.cpp Network/tcp_sock.h \
 		Network/parserInfo.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tcp_sock.o Network/tcp_sock.cpp
+
+buzzer.o: Hardware/Buzzer/buzzer.cpp Hardware/Buzzer/buzzer.h \
+		Hardware/Buzzer/tones.h \
+		Hardware/Buzzer/melody.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o buzzer.o Hardware/Buzzer/buzzer.cpp
+
+key.o: Hardware/Key/key.cpp Hardware/Key/key.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o key.o Hardware/Key/key.cpp
+
+resource.o: Resource/resource.cpp Resource/resource.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o resource.o Resource/resource.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
@@ -399,6 +476,12 @@ moc_camera.o: moc_camera.cpp
 
 moc_network.o: moc_network.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_network.o moc_network.cpp
+
+moc_buzzer.o: moc_buzzer.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_buzzer.o moc_buzzer.cpp
+
+moc_key.o: moc_key.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_key.o moc_key.cpp
 
 ####### Install
 

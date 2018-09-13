@@ -5,25 +5,42 @@
 #include "Camera/camera.h"
 #include "config.h"
 
+#include <qevent.h>
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     // set titleless window
-    this->setWindowFlags(Qt::Popup);
+    // this->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::Popup);
+
+
+    // this->setWindowFlags(Qt::Popup);
+    res = new Resource();
 
 
     // init camera
-    this->camTh = new Camera(D_CAMERA_POLLING_MSEC, D_CAMEARA_CAPTURE_WIDTH, D_CAMEARA_CAPTURE_HEIGHT);
+    this->camTh = new Camera(33, D_CAMEARA_CAPTURE_WIDTH, D_CAMEARA_CAPTURE_HEIGHT);
     connect(this->camTh, SIGNAL(captureImg()), this, SLOT(streamImg()));
     this->camTh->start();
 
     // init nework
-    this->netTh = new Network(D_NETWORK_SLEEP_MSEC);
-    // connect(this->netTh, SIGNAL(updateRawImg()), this, SLOT(getRawImg()));
+    this->netTh = new Network(D_NETWORK_SLEEP_MSEC,res);
+
     connect(this, SIGNAL(updateRawImgFin()), this->netTh, SLOT(sendRawImgData()));
 	connect(this->netTh, SIGNAL(imgProcessFin()), this, SLOT(updateIPResult()));
+    connect(this->netTh, SIGNAL(resourceUpdateFin()), this, SLOT(updateResource()));
     this->netTh->start();
+
+    // buzzer init
+    this->buzzerTh = new Buzzer();
+    this->buzzerTh->start();
+
+    // key init
+    this->keyTh = new Key();
+    connect(this->keyTh, SIGNAL(keyPressed()), this, SLOT(on_externalButton_pressed()));
+    this->keyTh->start();
 
     ui->setupUi(this);
 
@@ -39,13 +56,27 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->portcb->addItem("8080");
 
-    ui->factorycb->addItem("main 8");
+    for(int i = 1 ; i <= 5 ; i++)
+    {
+        QString s = "M";
+        s.append(QString::number(i));
+        ui->factorycb->addItem(s);
+    }
 
+    for(int i = 1 ; i <= 3 ; i++)
+    {
+        QString s = "F";
+        s.append(QString::number(i));
+        ui->factorycb->addItem(s);
+    }
+
+    // setting
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow()
 {
-    qDebug() << "delete ui";
+    qDebug() << "delete ui";    
     delete ui;
 }
 
@@ -53,13 +84,23 @@ void MainWindow::getRawImg()
 {
     int size;
 	uchar * data;
+
+    data = this->camTh->getCapturedRawImg(&size);
 	
-	data = this->camTh->getCapturedRawImg(&size);  	
-	
-	this->netTh->setRawImgData(data);
-	this->netTh->setRawImgDataSize(size);
-	
+
+
+    if(this->resourceFin == true)
+    {
+        this->netTh->setRawImgData(data, size, res->getimgIdx(this->curIdx));
+    }
+    else
+    {
+        this->netTh->setRawImgData(data, size, this->curIdx);
+    }
+
+
     emit updateRawImgFin();
+
 }
 
 void MainWindow::streamImg()
@@ -79,6 +120,7 @@ void MainWindow::on_exitButton_clicked()
     this->close();
 }
 
+
 void MainWindow::updateIPResult()
 {
 	// show result data
@@ -86,9 +128,27 @@ void MainWindow::updateIPResult()
 }
 
 
-void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
+void MainWindow::updateResource()
 {
-#define MAX_CAPURES  5
+    this->curIdx = 0;   //
+    this->maxIdx = res->getSize();
+    resourceFin = true;
+
+    for(int i = 0 ; i < MAX_CAPURES - 1 ;i++)
+    {
+        img[i+1] = res->getData(i, (index+i));
+    }
+
+    // update image
+    drawImg(-1,0,0,false,false);
+
+}
+
+
+
+void MainWindow::drawImg(int idx,int x, int y, bool result, bool capture)
+{
+
     static int cnt = 1;
     static int size[][2] =
     {
@@ -98,28 +158,43 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
         {D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11},
         {D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11},
     };
+    bool shift = false;
 
-    static Mat img[MAX_CAPURES];
     static QLabel * lb[MAX_CAPURES] =
     {
         ui->capturedImg1, ui->capturedImg2, ui->capturedImg3, ui->capturedImg4, ui->capturedImg5,
     };
 
-	if(shift == true)
+    if(capture == true)
 	{
 		img[0] = this->camTh->getCapturedImg();
 		cv::cvtColor(img[0], img[0], CV_BGR2RGB);
+        qDebug() << "capture";
 	}
-
-    if(0 <= idx && idx < MAX_CAPURES)
+    else
     {
-        if(result == true)
+        if(0 <= idx && idx < MAX_CAPURES)
         {
-            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(0,255,0), 10);
-        }
-        else
-        {
-            cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(255,0,0), 10);
+            if(result == true)
+            {
+                this->buzzerTh->playCaptureResultOKMelody();
+
+                shift = true;
+
+
+                cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(0,255,0), 10);
+
+
+                this->curIdx++;
+                QString s = QString::number(this->curIdx+1);
+                ui->curStep->setText(s);
+
+            }
+            else
+            {
+                this->buzzerTh->playWrongMelody();
+                cv::rectangle(img[idx], Point(0,0), Point(img[idx].cols-5, img[idx].rows), Scalar(255,0,0), 10);
+            }
         }
     }
 
@@ -130,7 +205,7 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
         lb[i]->setPixmap(QPixmap::fromImage(QImage(img[i].data, img[i].cols, img[i].rows, img[i].step, QImage::Format_RGB888)));
     }
 
-	if(shift)
+    if(shift)
 	{
 		for(int i = MAX_CAPURES - 1; i > 0 ;i--)
 		{
@@ -142,9 +217,19 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool shift)
 
 void MainWindow::on_captureButton_clicked()
 {
+    qDebug() << "Capture Button Pressed!!";
+    this->buzzerTh->playCaptureMelody();
     this->getRawImg();
     this->drawImg(-1,0,0, false, true);
 
+}
+
+void MainWindow::on_externalButton_pressed()
+{
+    this->buzzerTh->playCaptureMelody();
+
+    this->getRawImg();
+    this->drawImg(-1,0,0, false, true);
 }
 
 void MainWindow::on_matchRateSlider_sliderMoved(int position)
@@ -152,5 +237,154 @@ void MainWindow::on_matchRateSlider_sliderMoved(int position)
     QString s = QString::number(position);
     s.append("%");
     ui->currentRate->setText(s);
+
+    this->setImgMatchRate();
 }
 
+
+void MainWindow::on_ResetButton_clicked()
+{
+    this->curIdx = 0;
+}
+
+void MainWindow::on_leftButton_clicked()
+{
+    if(resourceFin == false)    return;
+
+    this->viewIdx--;
+    if(viewIdx < 0 )
+    {
+        viewIdx = 0;
+    }
+    updateLowerUI();
+}
+
+void MainWindow::on_rightButton_clicked()
+{
+    if(resourceFin == false)    return;
+
+    this->viewIdx++;
+    if(viewIdx > MAX_CAPURES - 1)
+    {
+        viewIdx = MAX_CAPURES - 1;
+    }
+    updateLowerUI();
+}
+
+void MainWindow::updateLowerUI()
+{
+    int index;
+    for(int i = 0 ; i < MAX_CAPURES - 1 ;i++)
+    {
+        img[i+1] = res->getData(i+viewIdx, &index);
+    }
+
+    // update image
+    drawImg(-1,0,0,false,false);
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    // qDebug() << index;
+    bool camEnable = index == 0 ? false : true;
+
+    this->camTh->enableStreaming(camEnable);
+
+}
+
+void MainWindow::setIpAddress() // test ok
+{
+    static QComboBox * order[] =
+    {
+        ui->ipcb1, ui->ipcb2, ui->ipcb3, ui->ipcb4
+    };
+
+    if(this->netTh == NULL) return;
+
+    IP.clear();
+
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        IP.append(order[i]->currentText());
+        if(i != 3)
+        {
+            IP.append(".");
+        }
+    }
+
+    // qDebug() << IP;
+
+    tempQs = IP.toLatin1();
+
+    netTh->setServerIpAddress(tempQs.data());
+
+}
+
+void MainWindow::setPort()  // test ok
+{
+    if(this->netTh == NULL) return;
+
+    int port = this->ui->portcb->currentText().toInt();
+
+    // qDebug() << port;
+
+    netTh->setPort(port);
+}
+
+void MainWindow::setImgMatchRate()  // test ok
+{
+    if(this->netTh == NULL) return;
+    int pos = this->ui->matchRateSlider->sliderPosition();
+
+    // qDebug() << pos;
+
+    netTh->setImgRate(pos);
+}
+
+void MainWindow::setProcess()   // test ok
+{
+    if(this->netTh == NULL) return;
+
+    process.clear();
+
+    process.append(ui->factorycb->currentText());
+
+    // qDebug() << process;
+
+    tempQs = process.toLatin1();
+
+    netTh->setProcess(tempQs.data());
+}
+
+
+
+void MainWindow::on_factorycb_currentTextChanged(const QString &arg1)
+{
+    // qDebug() << arg1;
+    this->setProcess();
+}
+
+void MainWindow::on_ipcb1_currentIndexChanged(const QString &arg1)
+{
+    this->setIpAddress();
+}
+
+void MainWindow::on_ipcb2_currentIndexChanged(const QString &arg1)
+{
+    this->setIpAddress();
+}
+
+void MainWindow::on_ipcb3_currentIndexChanged(const QString &arg1)
+{
+    this->setIpAddress();
+}
+
+void MainWindow::on_ipcb4_currentIndexChanged(const QString &arg1)
+{
+    this->setIpAddress();
+}
+
+void MainWindow::on_portcb_currentIndexChanged(const QString &arg1)
+{
+    this->setPort();
+}

@@ -29,17 +29,10 @@ public:
     cv::Mat getCapturedImg();
     uchar * getCapturedRawImg(int * size);
 
-    void enableStreaming(bool enable);
-
-
-
 private:
     unsigned int pollingPeriod;
     bool _exit;
     bool _enabled;
-
-
-
     void run();
     raspicam::RaspiCam_Cv cam;
     cv::Mat capturedImg;
