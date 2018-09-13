@@ -12,6 +12,11 @@ int query_state;
 
 static int getWorkitemsFromDB(MYSQL *mysql, const unsigned int step);
 
+extern packInfo_tx proc_seq_table[D_MAX_PROC_SEQ];
+extern unsigned int totalTbCounter;
+extern unsigned char proc_seq_order[D_MAX_PROC_SEQ];
+
+
 int mysql_connect(void)
 {
     cout << "connect sql server" <<endl;
@@ -118,9 +123,10 @@ int getProcessSeqFromDB(const char *ordernum, const char *process)
                 unsigned int procnum = (unsigned int)atoi(value_string);
                 int workitem = getWorkitemsFromDB(connection, procnum);
                 if(workitem != -1){
-          //          proc_seq_table[tableCounter].action_type = procnum;
-          //          proc_seq_table[tableCounter].item_id = workitem;
-          //          tableCounter++;
+                    proc_seq_table[totalTbCounter].action_type = procnum;
+                    proc_seq_table[totalTbCounter].item_id = workitem;
+                    proc_seq_order[totalTbCounter] = procnum;
+                    totalTbCounter++;
                 }
 
                 idx++;

@@ -8,7 +8,7 @@
 extern void setNetworkHandler(Network* net);
 extern int transfer_proc_init(void);
 extern int transfer_data_proc(void);
-
+extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx);
 
 Network::Network(unsigned int msecPollingPeriod, Resource * res)
 {
@@ -87,6 +87,11 @@ void Network::sendRawImgData()
    //data*
    qDebug() << this->rawDataImgSize << endl;
 
+   requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, 0); //index will be switched by step .
+
+
+
+#if 0
    packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
    //memset(pack, 0, sizeof(packInfo_tx));
 
@@ -112,6 +117,7 @@ void Network::sendRawImgData()
    
    printf("%p\n", pack);
    buildPacket(pack);
+#endif
 
 
 }

@@ -32,8 +32,9 @@ static tcp_client comm;
 
 //public handle
 packInfo_tx proc_seq_table[D_MAX_PROC_SEQ];
-unsigned int tableCounter;
-
+unsigned int totalTbCounter;
+static unsigned int procCounter = 0;
+unsigned char proc_seq_order[D_MAX_PROC_SEQ];
 
 int appendJob(jobInfo_t *job);
 void deleteJob(jobInfo_t *job);
@@ -349,17 +350,31 @@ extern int transfer_proc_init(void)
 
 
 
-    //memset(proc_seq_table, 0, sizeof(proc_seq_table)); //reset buffer to restore proc sequence table
-    //tableCounter = 0;
+    memset(proc_seq_table, 0, sizeof(proc_seq_table)); //reset buffer to restore proc sequence table
+    memset(proc_seq_order, 0, sizeof(proc_seq_order));
+    totalTbCounter = 0;
+    procCounter = 0;
 
     char *ordernum = "3029C003AA";
     char *process = "M1";
     ret = getProcessSeqFromDB(ordernum, process);
 
+    cout << "total qurery list counter: " << totalTbCounter <<endl;
+
+    for(int iq = 0; iq < totalTbCounter; iq++)
+    {
+        printf("proc table: %d\n", proc_seq_table[iq].action_type);
+        printf("item id: %d\n", proc_seq_table[iq].item_id);
+
+
+    }
+
     return ret;
 }
 
-
+//public handle
+//packInfo_tx proc_seq_table[D_MAX_PROC_SEQ];
+//unsigned int tableCounter;
 /*
  *
  * switch(info.action_type)
@@ -388,4 +403,74 @@ extern int transfer_proc_init(void)
 				break;
 		}
  */
+
+//packInfo_tx proc_seq_table[D_MAX_PROC_SEQ];
+//unsigned int tableCounter;
+//unsigned int procCounter = 0;
+int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
+{
+    printf("requestAnalysisToServer: %d\n", idx);
+    int ret = 0;
+
+    if(idx == 0)
+    {
+        //just one time at beginning proc to get order number.
+        packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
+        memset(pack, 0, sizeof(packInfo_tx));
+
+        pack->cmd_type = CMD_TYPE_REQUEST; //fixed
+        pack->action_type = WORK_ORDER;
+        pack->item_id = ACT_BARCODE1D;
+        pack->cell_num = 1;
+        pack->process_num = 1; //would it be got from db server
+        pack->accuracy = 100; //will set it from UI
+        pack->order_size = 0;  //will have to make it from pack
+        pack->image_size = size;
+        pack->image_data = (char*)image;
+        buildPacket(pack);
+    }
+    else if(proc_seq_table[procCounter].action_type == idx && procCounter <= totalTbCounter)
+    {
+        packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
+        memset(pack, 0, sizeof(packInfo_tx));
+
+        pack->cmd_type = CMD_TYPE_REQUEST; //fixed
+        //pack->action_type = ACT_BARCODE1D;
+        //pack->item_id = WORK_ORDER;
+        pack->action_type = proc_seq_table[procCounter].action_type;
+        pack->item_id = proc_seq_table[procCounter].item_id;
+
+        pack->cell_num = 1;
+        pack->process_num = 1; //would it be got from db server
+        pack->accuracy = 100; //will set it from UI
+        pack->order_size = 0;  //will have to make it from pack
+        pack->image_size = size;
+        pack->image_data = (char*)image;
+
+        printf("%p\n", pack);
+        buildPacket(pack);
+
+        procCounter++;
+
+    }
+    else
+    {
+        cout <<"ERROR: Wrong sequence! "<<endl;
+        ret = -1;
+    }
+
+    return ret;
+}
+
+int notifyNumOfProcessSeq(char **PS, unsigned int *cnt)
+{
+    int ret = -1;
+    cout << "notify number of proc seq" << endl;
+    if(*PS != nullptr){
+        memcpy(*PS, proc_seq_order, D_MAX_PROC_SEQ);
+        *cnt = totalTbCounter;
+        ret = 1;
+    }
+    return ret;
+}
 
