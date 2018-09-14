@@ -18,6 +18,7 @@ using namespace std;
 
 #define D_HEADER_SIZE 11
 #define D_MAX_PROC_SEQ 255
+#define D_MAX_ORD_NUM 128
 
 typedef int (*callbackFunc)(void *param);
 

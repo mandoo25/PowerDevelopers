@@ -27,8 +27,9 @@ queue<jobInfo_t *> job_list;
 //mutex mutex_;
 //condition_variable cond_;
 static jobInfo_t *currentJobData = nullptr;
-static char order_num[128];
+static char order_num[D_MAX_ORD_NUM];
 static tcp_client comm;
+static jobStatus_t State;
 
 //public handle
 packInfo_tx proc_seq_table[D_MAX_PROC_SEQ];
@@ -56,6 +57,8 @@ extern int transfer_data_proc(void)
 
     host = "10.1.31.105";
 
+    State = JS_READY;
+
 #if 0
 	//connect to host
 	rval = comm.conn(host , 5001);
@@ -63,34 +66,6 @@ extern int transfer_data_proc(void)
 		cout << "connection fail" <<endl;
         return -1;
 	}
-#endif
-#if DEBUG_I
-	packInfo_tx pack;
-
-	memset(&pack, 0, sizeof(packInfo_tx));
-
-
-	pack.cmd_type = CMD_TYPE_REQUEST;
-	pack.action_type = ACT_BARCODE1D;
-	pack.item_id = WORK_ORDER;
-    pack.cell_num = 1;
-    pack.process_num = 1;
-    pack.accuracy = 100;
-
-    //char odr[8] = {'a','b','c','d','e','f','g','h'};//910913C00692BA21YBN01115
-    //pack.order_size = sizeof(odr);
-    //pack.order_num = &odr[0];
-
-    char *image = (char *)malloc(1024*1014*1);
-
-    unsigned int img_size =0;
-    test_makeRAWdata(image, &img_size);
-
-    pack.image_size = img_size;
-    pack.image_data = image;
-    printf("data: %p\n", pack.image_data);
-
-	buildPacket(&pack);
 #endif
 #if 0
 	//unique_lock<std::mutex> mlock(mutex_);
@@ -104,6 +79,7 @@ extern int transfer_data_proc(void)
 #if 1
     if(!job_list.empty())
 	{
+        State = JS_PROCESSING;
 
         qDebug() <<"Entered hostname : 10.1.31.57:5001";
 
@@ -111,6 +87,7 @@ extern int transfer_data_proc(void)
         rval = comm.conn(host , 5001);
         if(rval < 0){
             cout << "connection fail" <<endl;
+            State = JS_ERROR;
             return -1;
         }
 
@@ -120,13 +97,12 @@ extern int transfer_data_proc(void)
         if(!comm.send_data((jobInfo_t *)currentJobData))
 		{
 			cout << "send falure" << endl;
+            State = JS_ERROR;
 		}
 
 		//here : receive packet
         comm.receive((jobInfo_t*)currentJobData);
 		//deleteJob(temp);
-
-
 
 
 	}
@@ -153,6 +129,7 @@ int receiveFunc(char *data)
 	if(ret != true)
 	{
 		cout << "Error! parse on rev data" << endl;
+        State = JS_ERROR;
 		return false;
 	}
 	printf("____ recieved packet ___\n");
@@ -278,7 +255,11 @@ bool parsePacket(packInfo_rx *info, char *data)
 		info->data_size = rs_data[14];
         memcpy(info->data, &rs_data[15], sizeof(char)*info->data_size);
 	}
-	else return false;
+    else
+    {
+        State = JS_ERROR;
+        return false;
+    }
 
 	cout << "parser success" << endl;
 	return true;
@@ -300,7 +281,7 @@ bool verifyPackInfo(packInfo_rx *info)
 
 void getDevOrderNumber(char *num)
 {
-	strncpy(num, order_num, strlen(order_num)+1);
+    strncpy(num, order_num, strlen(order_num));
 }
 
 void test_makeRAWdata(char *img,  unsigned int *size)
@@ -348,26 +329,37 @@ extern int transfer_proc_init(void)
 {
     int ret = -1;
 
-
-
     memset(proc_seq_table, 0, sizeof(proc_seq_table)); //reset buffer to restore proc sequence table
     memset(proc_seq_order, 0, sizeof(proc_seq_order));
+    memset(order_num, 0, D_MAX_ORD_NUM);
     totalTbCounter = 0;
     procCounter = 0;
-
-    char *ordernum = "3029C003AA";
-    char *process = "M1";
-    ret = getProcessSeqFromDB(ordernum, process);
+    State = JS_IDLE;
 
     cout << "total qurery list counter: " << totalTbCounter <<endl;
 
+    /*
     for(int iq = 0; iq < totalTbCounter; iq++)
     {
         printf("proc table: %d\n", proc_seq_table[iq].action_type);
         printf("item id: %d\n", proc_seq_table[iq].item_id);
-
-
     }
+    */
+
+    return ret;
+}
+
+int setProcSequence(void)
+{
+    int ret = -1;
+
+    char *ordernum = "3029C003AA";
+    char *process = "M1";
+    ret = getProcessSeqFromDB(ordernum, process);
+    if(ret > 0)
+        State = JS_READY;
+    else
+        State = JS_ERROR;
 
     return ret;
 }
@@ -409,10 +401,11 @@ extern int transfer_proc_init(void)
 //unsigned int procCounter = 0;
 int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
 {
+
     printf("requestAnalysisToServer: %d\n", idx);
     int ret = 0;
 
-    if(idx == 0)
+    if(State == JS_IDLE && idx == 0)
     {
         //just one time at beginning proc to get order number.
         packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
@@ -429,34 +422,42 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
         pack->image_data = (char*)image;
         buildPacket(pack);
     }
-    else if(proc_seq_table[procCounter].action_type == idx && procCounter <= totalTbCounter)
+    else if(State == JS_READY)
     {
-        packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
-        memset(pack, 0, sizeof(packInfo_tx));
+        if(proc_seq_table[procCounter].action_type == idx && procCounter <= totalTbCounter)
+            {
+                packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
+                memset(pack, 0, sizeof(packInfo_tx));
 
-        pack->cmd_type = CMD_TYPE_REQUEST; //fixed
-        //pack->action_type = ACT_BARCODE1D;
-        //pack->item_id = WORK_ORDER;
-        pack->action_type = proc_seq_table[procCounter].action_type;
-        pack->item_id = proc_seq_table[procCounter].item_id;
+                pack->cmd_type = CMD_TYPE_REQUEST; //fixed
+                //pack->action_type = ACT_BARCODE1D;
+                //pack->item_id = WORK_ORDER;
+                pack->action_type = proc_seq_table[procCounter].action_type;
+                pack->item_id = proc_seq_table[procCounter].item_id;
 
-        pack->cell_num = 1;
-        pack->process_num = 1; //would it be got from db server
-        pack->accuracy = 100; //will set it from UI
-        pack->order_size = 0;  //will have to make it from pack
-        pack->image_size = size;
-        pack->image_data = (char*)image;
+                pack->cell_num = 1;
+                pack->process_num = 1; //would it be got from db server
+                pack->accuracy = 100; //will set it from UI
+                pack->order_size = 0;  //will have to make it from pack
+                pack->image_size = size;
+                pack->image_data = (char*)image;
 
-        printf("%p\n", pack);
-        buildPacket(pack);
+                printf("%p\n", pack);
+                buildPacket(pack);
 
-        procCounter++;
+                procCounter++;
 
+            }
+            else
+            {
+                cout <<"ERROR: Wrong sequence! "<<endl;
+                ret = -1;
+            }
     }
     else
     {
-        cout <<"ERROR: Wrong sequence! "<<endl;
-        ret = -1;
+        cout << "Unexpected proc seq num"<<endl;
+        return -1;
     }
 
     return ret;
