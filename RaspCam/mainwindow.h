@@ -41,29 +41,38 @@ private slots:
 
     void updateResource();
 
+    // external button
     void on_externalButton_pressed();
 
     void on_ResetButton_clicked();
 
     void on_leftButton_clicked();
-
     void on_rightButton_clicked();
 
+    // tab changed
     void on_tabWidget_currentChanged(int index);
 
+    // factory process changed
     void on_factorycb_currentTextChanged(const QString &arg1);
 
+    // ip changed
     void on_ipcb1_currentIndexChanged(const QString &arg1);
-
     void on_ipcb2_currentIndexChanged(const QString &arg1);
-
     void on_ipcb3_currentIndexChanged(const QString &arg1);
-
     void on_ipcb4_currentIndexChanged(const QString &arg1);
 
+    // port changed
     void on_portcb_currentIndexChanged(const QString &arg1);
 
+    // capture!!
     void on_streamingImg_clicked();
+
+    // lower ui clicked
+    void on_img0_clicked();
+    void on_img1_clicked();
+    void on_img2_clicked();
+    void on_img3_clicked();
+    void on_img4_clicked();
 
 private:
     Ui::MainWindow *ui;

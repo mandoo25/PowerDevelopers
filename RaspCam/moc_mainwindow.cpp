@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[24];
-    char stringdata0[475];
+    QByteArrayData data[29];
+    char stringdata0[555];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -52,7 +52,12 @@ QT_MOC_LITERAL(19, 334, 28), // "on_ipcb2_currentIndexChanged"
 QT_MOC_LITERAL(20, 363, 28), // "on_ipcb3_currentIndexChanged"
 QT_MOC_LITERAL(21, 392, 28), // "on_ipcb4_currentIndexChanged"
 QT_MOC_LITERAL(22, 421, 29), // "on_portcb_currentIndexChanged"
-QT_MOC_LITERAL(23, 451, 23) // "on_streamingImg_clicked"
+QT_MOC_LITERAL(23, 451, 23), // "on_streamingImg_clicked"
+QT_MOC_LITERAL(24, 475, 15), // "on_img0_clicked"
+QT_MOC_LITERAL(25, 491, 15), // "on_img1_clicked"
+QT_MOC_LITERAL(26, 507, 15), // "on_img2_clicked"
+QT_MOC_LITERAL(27, 523, 15), // "on_img3_clicked"
+QT_MOC_LITERAL(28, 539, 15) // "on_img4_clicked"
 
     },
     "MainWindow\0updateRawImgFin\0\0"
@@ -69,7 +74,9 @@ QT_MOC_LITERAL(23, 451, 23) // "on_streamingImg_clicked"
     "on_ipcb3_currentIndexChanged\0"
     "on_ipcb4_currentIndexChanged\0"
     "on_portcb_currentIndexChanged\0"
-    "on_streamingImg_clicked"
+    "on_streamingImg_clicked\0on_img0_clicked\0"
+    "on_img1_clicked\0on_img2_clicked\0"
+    "on_img3_clicked\0on_img4_clicked"
 };
 #undef QT_MOC_LITERAL
 
@@ -79,7 +86,7 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      19,   14, // methods
+      24,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -87,27 +94,32 @@ static const uint qt_meta_data_MainWindow[] = {
        1,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,  109,    2, 0x06 /* Public */,
+       1,    0,  134,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       3,    0,  110,    2, 0x08 /* Private */,
-       4,    0,  111,    2, 0x08 /* Private */,
-       5,    0,  112,    2, 0x08 /* Private */,
-       6,    1,  113,    2, 0x08 /* Private */,
-       8,    0,  116,    2, 0x08 /* Private */,
-       9,    0,  117,    2, 0x08 /* Private */,
-      10,    0,  118,    2, 0x08 /* Private */,
-      11,    0,  119,    2, 0x08 /* Private */,
-      12,    0,  120,    2, 0x08 /* Private */,
-      13,    0,  121,    2, 0x08 /* Private */,
-      14,    1,  122,    2, 0x08 /* Private */,
-      16,    1,  125,    2, 0x08 /* Private */,
-      18,    1,  128,    2, 0x08 /* Private */,
-      19,    1,  131,    2, 0x08 /* Private */,
-      20,    1,  134,    2, 0x08 /* Private */,
-      21,    1,  137,    2, 0x08 /* Private */,
-      22,    1,  140,    2, 0x08 /* Private */,
-      23,    0,  143,    2, 0x08 /* Private */,
+       3,    0,  135,    2, 0x08 /* Private */,
+       4,    0,  136,    2, 0x08 /* Private */,
+       5,    0,  137,    2, 0x08 /* Private */,
+       6,    1,  138,    2, 0x08 /* Private */,
+       8,    0,  141,    2, 0x08 /* Private */,
+       9,    0,  142,    2, 0x08 /* Private */,
+      10,    0,  143,    2, 0x08 /* Private */,
+      11,    0,  144,    2, 0x08 /* Private */,
+      12,    0,  145,    2, 0x08 /* Private */,
+      13,    0,  146,    2, 0x08 /* Private */,
+      14,    1,  147,    2, 0x08 /* Private */,
+      16,    1,  150,    2, 0x08 /* Private */,
+      18,    1,  153,    2, 0x08 /* Private */,
+      19,    1,  156,    2, 0x08 /* Private */,
+      20,    1,  159,    2, 0x08 /* Private */,
+      21,    1,  162,    2, 0x08 /* Private */,
+      22,    1,  165,    2, 0x08 /* Private */,
+      23,    0,  168,    2, 0x08 /* Private */,
+      24,    0,  169,    2, 0x08 /* Private */,
+      25,    0,  170,    2, 0x08 /* Private */,
+      26,    0,  171,    2, 0x08 /* Private */,
+      27,    0,  172,    2, 0x08 /* Private */,
+      28,    0,  173,    2, 0x08 /* Private */,
 
  // signals: parameters
     QMetaType::Void,
@@ -130,6 +142,11 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void, QMetaType::QString,   17,
     QMetaType::Void, QMetaType::QString,   17,
     QMetaType::Void, QMetaType::QString,   17,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
 
        0        // eod
@@ -160,6 +177,11 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 16: _t->on_ipcb4_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 17: _t->on_portcb_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 18: _t->on_streamingImg_clicked(); break;
+        case 19: _t->on_img0_clicked(); break;
+        case 20: _t->on_img1_clicked(); break;
+        case 21: _t->on_img2_clicked(); break;
+        case 22: _t->on_img3_clicked(); break;
+        case 23: _t->on_img4_clicked(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -200,13 +222,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 19)
+        if (_id < 24)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 19;
+        _id -= 24;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 19)
+        if (_id < 24)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 19;
+        _id -= 24;
     }
     return _id;
 }

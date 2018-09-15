@@ -54,6 +54,11 @@ public:
     QLabel *preCapturedImg;
     QWidget *horizontalLayoutWidget;
     QHBoxLayout *capturedImgLayout;
+    QPushButton *img0;
+    QPushButton *img1;
+    QPushButton *img2;
+    QPushButton *img3;
+    QPushButton *img4;
     QWidget *horizontalLayoutWidget_2;
     QHBoxLayout *horizontalLayout_2;
     QPushButton *ResetButton;
@@ -213,7 +218,7 @@ public:
         CameraTab->setFont(font);
         verticalLayoutWidget = new QWidget(CameraTab);
         verticalLayoutWidget->setObjectName(QStringLiteral("verticalLayoutWidget"));
-        verticalLayoutWidget->setGeometry(QRect(310, 20, 171, 121));
+        verticalLayoutWidget->setGeometry(QRect(310, 10, 171, 121));
         verticalLayout = new QVBoxLayout(verticalLayoutWidget);
         verticalLayout->setSpacing(6);
         verticalLayout->setContentsMargins(11, 11, 11, 11);
@@ -226,15 +231,53 @@ public:
 
         horizontalLayoutWidget = new QWidget(CameraTab);
         horizontalLayoutWidget->setObjectName(QStringLiteral("horizontalLayoutWidget"));
-        horizontalLayoutWidget->setGeometry(QRect(60, 220, 371, 66));
+        horizontalLayoutWidget->setGeometry(QRect(60, 210, 371, 66));
         capturedImgLayout = new QHBoxLayout(horizontalLayoutWidget);
         capturedImgLayout->setSpacing(15);
         capturedImgLayout->setContentsMargins(11, 11, 11, 11);
         capturedImgLayout->setObjectName(QStringLiteral("capturedImgLayout"));
         capturedImgLayout->setContentsMargins(0, 0, 0, 0);
+        img0 = new QPushButton(horizontalLayoutWidget);
+        img0->setObjectName(QStringLiteral("img0"));
+        QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(img0->sizePolicy().hasHeightForWidth());
+        img0->setSizePolicy(sizePolicy);
+
+        capturedImgLayout->addWidget(img0);
+
+        img1 = new QPushButton(horizontalLayoutWidget);
+        img1->setObjectName(QStringLiteral("img1"));
+        sizePolicy.setHeightForWidth(img1->sizePolicy().hasHeightForWidth());
+        img1->setSizePolicy(sizePolicy);
+
+        capturedImgLayout->addWidget(img1);
+
+        img2 = new QPushButton(horizontalLayoutWidget);
+        img2->setObjectName(QStringLiteral("img2"));
+        sizePolicy.setHeightForWidth(img2->sizePolicy().hasHeightForWidth());
+        img2->setSizePolicy(sizePolicy);
+
+        capturedImgLayout->addWidget(img2);
+
+        img3 = new QPushButton(horizontalLayoutWidget);
+        img3->setObjectName(QStringLiteral("img3"));
+        sizePolicy.setHeightForWidth(img3->sizePolicy().hasHeightForWidth());
+        img3->setSizePolicy(sizePolicy);
+
+        capturedImgLayout->addWidget(img3);
+
+        img4 = new QPushButton(horizontalLayoutWidget);
+        img4->setObjectName(QStringLiteral("img4"));
+        sizePolicy.setHeightForWidth(img4->sizePolicy().hasHeightForWidth());
+        img4->setSizePolicy(sizePolicy);
+
+        capturedImgLayout->addWidget(img4);
+
         horizontalLayoutWidget_2 = new QWidget(CameraTab);
         horizontalLayoutWidget_2->setObjectName(QStringLiteral("horizontalLayoutWidget_2"));
-        horizontalLayoutWidget_2->setGeometry(QRect(310, 140, 171, 80));
+        horizontalLayoutWidget_2->setGeometry(QRect(310, 130, 171, 80));
         horizontalLayout_2 = new QHBoxLayout(horizontalLayoutWidget_2);
         horizontalLayout_2->setSpacing(6);
         horizontalLayout_2->setContentsMargins(11, 11, 11, 11);
@@ -242,9 +285,6 @@ public:
         horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
         ResetButton = new QPushButton(horizontalLayoutWidget_2);
         ResetButton->setObjectName(QStringLiteral("ResetButton"));
-        QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(ResetButton->sizePolicy().hasHeightForWidth());
         ResetButton->setSizePolicy(sizePolicy);
 
@@ -258,19 +298,26 @@ public:
 
         leftButton = new QPushButton(CameraTab);
         leftButton->setObjectName(QStringLiteral("leftButton"));
-        leftButton->setGeometry(QRect(10, 220, 41, 64));
+        leftButton->setGeometry(QRect(10, 210, 41, 64));
         sizePolicy.setHeightForWidth(leftButton->sizePolicy().hasHeightForWidth());
         leftButton->setSizePolicy(sizePolicy);
         leftButton->setMinimumSize(QSize(0, 0));
         rightButton = new QPushButton(CameraTab);
         rightButton->setObjectName(QStringLiteral("rightButton"));
-        rightButton->setGeometry(QRect(440, 220, 41, 64));
+        rightButton->setGeometry(QRect(440, 210, 41, 64));
         sizePolicy.setHeightForWidth(rightButton->sizePolicy().hasHeightForWidth());
         rightButton->setSizePolicy(sizePolicy);
         streamingImg = new QPushButton(CameraTab);
         streamingImg->setObjectName(QStringLiteral("streamingImg"));
-        streamingImg->setGeometry(QRect(10, 20, 291, 181));
+        streamingImg->setGeometry(QRect(10, 10, 291, 181));
         tabWidget->addTab(CameraTab, QString());
+        verticalLayoutWidget->raise();
+        horizontalLayoutWidget->raise();
+        horizontalLayoutWidget_2->raise();
+        leftButton->raise();
+        rightButton->raise();
+        streamingImg->raise();
+        preCapturedImg->raise();
         MainWindow->setCentralWidget(centralWidget);
 
         retranslateUi(MainWindow);
@@ -294,6 +341,11 @@ public:
         exitButton->setText(QApplication::translate("MainWindow", "Exit", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(SettingTab), QApplication::translate("MainWindow", "Settings", Q_NULLPTR));
         preCapturedImg->setText(QString());
+        img0->setText(QString());
+        img1->setText(QString());
+        img2->setText(QString());
+        img3->setText(QString());
+        img4->setText(QString());
         ResetButton->setText(QApplication::translate("MainWindow", "RESET", Q_NULLPTR));
         curStep->setText(QApplication::translate("MainWindow", "Barcode", Q_NULLPTR));
         leftButton->setText(QApplication::translate("MainWindow", "\342\227\200", Q_NULLPTR));

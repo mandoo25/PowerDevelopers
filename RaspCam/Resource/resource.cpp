@@ -1,10 +1,11 @@
+#include <QDebug>
+
 #include "resource.h"
-
-
+#include "../config.h"
 
 Resource::Resource()
 {
-
+    blank = cv::Mat(200,200,CV_8UC3, cv::Scalar(255, 255, 255));
 }
 
 Resource::~Resource()
@@ -35,8 +36,27 @@ void Resource::pushData(char * data, int size, int index)
     //std::vector<uchar> jpgbytes(data, data + size); // from your db
 
     //cv::Mat img = cv::imdecode(jpgbytes);
-    cv::Mat img = cv::imdecode(cv::Mat(1, size, CV_8UC1, data), CV_LOAD_IMAGE_UNCHANGED);
+    cv::Mat img;
+    if( data == NULL )
+    {
 
+        QString s = IMAGE_BASE_FOLDER_PATH;
+        s.append(QString::number(index));
+        s.append(".jpg");
+        std::string utf8_text = s.toUtf8().constData();
+        img = cv::imread(utf8_text);
+
+        if(img.empty())
+        {
+            qDebug() << "fail to read file :" <<s;
+            return;
+        }
+
+    }
+    else
+    {
+        img = cv::imdecode(cv::Mat(1, size, CV_8UC1, data), CV_LOAD_IMAGE_UNCHANGED);
+    }
 
     this->mutex.lock();
 
@@ -73,8 +93,15 @@ cv::Mat Resource::getImgAndIdx(int idx, int * index)
 
     this->mutex.lock();
 
-    img = this->imgs.at(idx);
-    *index = this->indexs.at(idx);
+    if( idx >= imgs.size() || idx < 0)
+    {
+        img = blank;
+    }
+    else
+    {
+        img = this->imgs.at(idx);
+        *index = this->indexs.at(idx);
+    }
 
     this->mutex.unlock();
 

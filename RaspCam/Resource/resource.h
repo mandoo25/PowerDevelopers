@@ -42,6 +42,8 @@ private:
 
     QMutex mutex;
 
+
+    cv::Mat blank;
 };
 
 
