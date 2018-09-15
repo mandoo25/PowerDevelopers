@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
 
 #include "Camera/camera.h"
 #include "Network/network.h"
@@ -28,7 +29,7 @@ public:
 private slots:
     void on_exitButton_clicked();
 
-    void on_captureButton_clicked();
+
 
     void streamImg();
 
@@ -62,6 +63,8 @@ private slots:
 
     void on_portcb_currentIndexChanged(const QString &arg1);
 
+    void on_streamingImg_clicked();
+
 private:
     Ui::MainWindow *ui;
     Camera * camTh = NULL;
@@ -69,9 +72,9 @@ private:
     Buzzer * buzzerTh= NULL;
     Key * keyTh = NULL;
 
-    void drawImg(int idx,int x, int y, bool result, bool capture);
+    void drawImg(bool draw, int x, int y, bool result);
 
-    void updateLowerUI();
+    void updateLowerUI(int startIdx);
 
     QPoint m_down;
     QPoint m_up;
@@ -83,8 +86,9 @@ private:
     int maxIdx;
     int viewIdx;
 
-    Mat img[MAX_CAPURES];
-    int index[MAX_CAPURES];
+    QPushButton * capturedImg[D_UI_NUMBER_OF_LOWER_UI_IMGS];
+    Mat img[D_UI_NUMBER_OF_LOWER_UI_IMGS];
+    int index[D_UI_NUMBER_OF_LOWER_UI_IMGS];
 
     bool resourceFin;
 

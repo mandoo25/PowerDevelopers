@@ -23,8 +23,11 @@ public:
 
 
     void pushData(char * data, int size, int index);
-    cv::Mat getData(int idx, int * index);
-    int getimgIdx(int idx);
+
+    cv::Mat getImgAndIdx(int idx, int * index);
+    void setImg(int idx, cv::Mat img);
+
+    int getImgIdx(int idx);
     void updateImg(int idx,cv::Mat img);
 
     int getSize();

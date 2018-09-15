@@ -47,27 +47,20 @@ public:
     QLabel *currentRate;
     QGroupBox *groupBox_3;
     QComboBox *factorycb;
+    QPushButton *exitButton;
     QWidget *CameraTab;
     QWidget *verticalLayoutWidget;
     QVBoxLayout *verticalLayout;
-    QLabel *capturedImg1;
-    QLabel *realtimeImg;
+    QLabel *preCapturedImg;
     QWidget *horizontalLayoutWidget;
-    QHBoxLayout *horizontalLayout;
-    QLabel *capturedImg2;
-    QLabel *capturedImg3;
-    QLabel *capturedImg4;
-    QLabel *capturedImg5;
+    QHBoxLayout *capturedImgLayout;
     QWidget *horizontalLayoutWidget_2;
     QHBoxLayout *horizontalLayout_2;
     QPushButton *ResetButton;
     QLabel *curStep;
     QPushButton *leftButton;
     QPushButton *rightButton;
-    QWidget *verticalLayoutWidget_2;
-    QVBoxLayout *verticalLayout_2;
-    QPushButton *captureButton;
-    QPushButton *exitButton;
+    QPushButton *streamingImg;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -152,6 +145,9 @@ public:
         factorycb = new QComboBox(groupBox_3);
         factorycb->setObjectName(QStringLiteral("factorycb"));
         factorycb->setGeometry(QRect(10, 40, 171, 21));
+        exitButton = new QPushButton(groupBox_3);
+        exitButton->setObjectName(QStringLiteral("exitButton"));
+        exitButton->setGeometry(QRect(370, 40, 85, 28));
         tabWidget->addTab(SettingTab, QString());
         CameraTab = new QWidget();
         CameraTab->setObjectName(QStringLiteral("CameraTab"));
@@ -223,42 +219,19 @@ public:
         verticalLayout->setContentsMargins(11, 11, 11, 11);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalLayout->setContentsMargins(0, 0, 0, 0);
-        capturedImg1 = new QLabel(verticalLayoutWidget);
-        capturedImg1->setObjectName(QStringLiteral("capturedImg1"));
+        preCapturedImg = new QLabel(verticalLayoutWidget);
+        preCapturedImg->setObjectName(QStringLiteral("preCapturedImg"));
 
-        verticalLayout->addWidget(capturedImg1);
+        verticalLayout->addWidget(preCapturedImg);
 
-        realtimeImg = new QLabel(CameraTab);
-        realtimeImg->setObjectName(QStringLiteral("realtimeImg"));
-        realtimeImg->setGeometry(QRect(10, 20, 251, 191));
         horizontalLayoutWidget = new QWidget(CameraTab);
         horizontalLayoutWidget->setObjectName(QStringLiteral("horizontalLayoutWidget"));
-        horizontalLayoutWidget->setGeometry(QRect(60, 220, 271, 66));
-        horizontalLayout = new QHBoxLayout(horizontalLayoutWidget);
-        horizontalLayout->setSpacing(15);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setContentsMargins(0, 0, 0, 0);
-        capturedImg2 = new QLabel(horizontalLayoutWidget);
-        capturedImg2->setObjectName(QStringLiteral("capturedImg2"));
-
-        horizontalLayout->addWidget(capturedImg2);
-
-        capturedImg3 = new QLabel(horizontalLayoutWidget);
-        capturedImg3->setObjectName(QStringLiteral("capturedImg3"));
-
-        horizontalLayout->addWidget(capturedImg3);
-
-        capturedImg4 = new QLabel(horizontalLayoutWidget);
-        capturedImg4->setObjectName(QStringLiteral("capturedImg4"));
-
-        horizontalLayout->addWidget(capturedImg4);
-
-        capturedImg5 = new QLabel(horizontalLayoutWidget);
-        capturedImg5->setObjectName(QStringLiteral("capturedImg5"));
-
-        horizontalLayout->addWidget(capturedImg5);
-
+        horizontalLayoutWidget->setGeometry(QRect(60, 220, 371, 66));
+        capturedImgLayout = new QHBoxLayout(horizontalLayoutWidget);
+        capturedImgLayout->setSpacing(15);
+        capturedImgLayout->setContentsMargins(11, 11, 11, 11);
+        capturedImgLayout->setObjectName(QStringLiteral("capturedImgLayout"));
+        capturedImgLayout->setContentsMargins(0, 0, 0, 0);
         horizontalLayoutWidget_2 = new QWidget(CameraTab);
         horizontalLayoutWidget_2->setObjectName(QStringLiteral("horizontalLayoutWidget_2"));
         horizontalLayoutWidget_2->setGeometry(QRect(310, 140, 171, 80));
@@ -291,29 +264,12 @@ public:
         leftButton->setMinimumSize(QSize(0, 0));
         rightButton = new QPushButton(CameraTab);
         rightButton->setObjectName(QStringLiteral("rightButton"));
-        rightButton->setGeometry(QRect(340, 220, 41, 64));
+        rightButton->setGeometry(QRect(440, 220, 41, 64));
         sizePolicy.setHeightForWidth(rightButton->sizePolicy().hasHeightForWidth());
         rightButton->setSizePolicy(sizePolicy);
-        verticalLayoutWidget_2 = new QWidget(CameraTab);
-        verticalLayoutWidget_2->setObjectName(QStringLiteral("verticalLayoutWidget_2"));
-        verticalLayoutWidget_2->setGeometry(QRect(390, 220, 87, 64));
-        verticalLayout_2 = new QVBoxLayout(verticalLayoutWidget_2);
-        verticalLayout_2->setSpacing(6);
-        verticalLayout_2->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
-        verticalLayout_2->setContentsMargins(0, 0, 0, 0);
-        captureButton = new QPushButton(verticalLayoutWidget_2);
-        captureButton->setObjectName(QStringLiteral("captureButton"));
-        captureButton->setEnabled(true);
-        captureButton->setIconSize(QSize(24, 24));
-
-        verticalLayout_2->addWidget(captureButton);
-
-        exitButton = new QPushButton(verticalLayoutWidget_2);
-        exitButton->setObjectName(QStringLiteral("exitButton"));
-
-        verticalLayout_2->addWidget(exitButton);
-
+        streamingImg = new QPushButton(CameraTab);
+        streamingImg->setObjectName(QStringLiteral("streamingImg"));
+        streamingImg->setGeometry(QRect(10, 20, 291, 181));
         tabWidget->addTab(CameraTab, QString());
         MainWindow->setCentralWidget(centralWidget);
 
@@ -335,19 +291,14 @@ public:
         label_5->setText(QApplication::translate("MainWindow", "Match Rate", Q_NULLPTR));
         currentRate->setText(QApplication::translate("MainWindow", "65%", Q_NULLPTR));
         groupBox_3->setTitle(QApplication::translate("MainWindow", "Factory Process", Q_NULLPTR));
+        exitButton->setText(QApplication::translate("MainWindow", "Exit", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(SettingTab), QApplication::translate("MainWindow", "Settings", Q_NULLPTR));
-        capturedImg1->setText(QString());
-        realtimeImg->setText(QString());
-        capturedImg2->setText(QString());
-        capturedImg3->setText(QString());
-        capturedImg4->setText(QString());
-        capturedImg5->setText(QString());
+        preCapturedImg->setText(QString());
         ResetButton->setText(QApplication::translate("MainWindow", "RESET", Q_NULLPTR));
         curStep->setText(QApplication::translate("MainWindow", "Barcode", Q_NULLPTR));
         leftButton->setText(QApplication::translate("MainWindow", "\342\227\200", Q_NULLPTR));
         rightButton->setText(QApplication::translate("MainWindow", "\342\226\266", Q_NULLPTR));
-        captureButton->setText(QApplication::translate("MainWindow", "Capture", Q_NULLPTR));
-        exitButton->setText(QApplication::translate("MainWindow", "Exit", Q_NULLPTR));
+        streamingImg->setText(QString());
         tabWidget->setTabText(tabWidget->indexOf(CameraTab), QApplication::translate("MainWindow", "Camera", Q_NULLPTR));
     } // retranslateUi
 

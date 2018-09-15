@@ -24,6 +24,8 @@ void Resource::clear()
     this->indexs.clear();
 
     this->mutex.unlock();
+
+
 }
 
 void Resource::pushData(char * data, int size, int index)
@@ -65,7 +67,7 @@ void Resource::updateImg(int idx,cv::Mat img)
     this->mutex.unlock();
 }
 
-cv::Mat Resource::getData(int idx, int * index)
+cv::Mat Resource::getImgAndIdx(int idx, int * index)
 {
     cv::Mat img;
 
@@ -79,15 +81,33 @@ cv::Mat Resource::getData(int idx, int * index)
     return img;
 
 }
+void Resource::setImg(int idx, cv::Mat img)
+{
+    this->mutex.lock();
 
-int Resource::getimgIdx(int idx)
+    this->imgs.removeAt(idx);
+    this->imgs.insert(idx,img);
+
+    this->mutex.unlock();
+}
+
+int Resource::getImgIdx(int idx)
 {
     int index;
 
+    idx = idx - 1;
+    if(idx < 0 ) return 0;
+
     this->mutex.lock();
 
-
-    index = this->indexs.at(idx);
+    if(this->indexs.size() < idx )
+    {
+        index = 0;
+    }
+    else
+    {
+        index = this->indexs.at(idx);
+    }
 
     this->mutex.unlock();
 

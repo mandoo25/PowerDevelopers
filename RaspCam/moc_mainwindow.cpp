@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_MainWindow_t {
     QByteArrayData data[24];
-    char stringdata0[476];
+    char stringdata0[475];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,31 +33,31 @@ QT_MOC_LITERAL(0, 0, 10), // "MainWindow"
 QT_MOC_LITERAL(1, 11, 15), // "updateRawImgFin"
 QT_MOC_LITERAL(2, 27, 0), // ""
 QT_MOC_LITERAL(3, 28, 21), // "on_exitButton_clicked"
-QT_MOC_LITERAL(4, 50, 24), // "on_captureButton_clicked"
-QT_MOC_LITERAL(5, 75, 9), // "streamImg"
-QT_MOC_LITERAL(6, 85, 9), // "getRawImg"
-QT_MOC_LITERAL(7, 95, 30), // "on_matchRateSlider_sliderMoved"
-QT_MOC_LITERAL(8, 126, 8), // "position"
-QT_MOC_LITERAL(9, 135, 14), // "updateIPResult"
-QT_MOC_LITERAL(10, 150, 14), // "updateResource"
-QT_MOC_LITERAL(11, 165, 25), // "on_externalButton_pressed"
-QT_MOC_LITERAL(12, 191, 22), // "on_ResetButton_clicked"
-QT_MOC_LITERAL(13, 214, 21), // "on_leftButton_clicked"
-QT_MOC_LITERAL(14, 236, 22), // "on_rightButton_clicked"
-QT_MOC_LITERAL(15, 259, 27), // "on_tabWidget_currentChanged"
-QT_MOC_LITERAL(16, 287, 5), // "index"
-QT_MOC_LITERAL(17, 293, 31), // "on_factorycb_currentTextChanged"
-QT_MOC_LITERAL(18, 325, 4), // "arg1"
-QT_MOC_LITERAL(19, 330, 28), // "on_ipcb1_currentIndexChanged"
-QT_MOC_LITERAL(20, 359, 28), // "on_ipcb2_currentIndexChanged"
-QT_MOC_LITERAL(21, 388, 28), // "on_ipcb3_currentIndexChanged"
-QT_MOC_LITERAL(22, 417, 28), // "on_ipcb4_currentIndexChanged"
-QT_MOC_LITERAL(23, 446, 29) // "on_portcb_currentIndexChanged"
+QT_MOC_LITERAL(4, 50, 9), // "streamImg"
+QT_MOC_LITERAL(5, 60, 9), // "getRawImg"
+QT_MOC_LITERAL(6, 70, 30), // "on_matchRateSlider_sliderMoved"
+QT_MOC_LITERAL(7, 101, 8), // "position"
+QT_MOC_LITERAL(8, 110, 14), // "updateIPResult"
+QT_MOC_LITERAL(9, 125, 14), // "updateResource"
+QT_MOC_LITERAL(10, 140, 25), // "on_externalButton_pressed"
+QT_MOC_LITERAL(11, 166, 22), // "on_ResetButton_clicked"
+QT_MOC_LITERAL(12, 189, 21), // "on_leftButton_clicked"
+QT_MOC_LITERAL(13, 211, 22), // "on_rightButton_clicked"
+QT_MOC_LITERAL(14, 234, 27), // "on_tabWidget_currentChanged"
+QT_MOC_LITERAL(15, 262, 5), // "index"
+QT_MOC_LITERAL(16, 268, 31), // "on_factorycb_currentTextChanged"
+QT_MOC_LITERAL(17, 300, 4), // "arg1"
+QT_MOC_LITERAL(18, 305, 28), // "on_ipcb1_currentIndexChanged"
+QT_MOC_LITERAL(19, 334, 28), // "on_ipcb2_currentIndexChanged"
+QT_MOC_LITERAL(20, 363, 28), // "on_ipcb3_currentIndexChanged"
+QT_MOC_LITERAL(21, 392, 28), // "on_ipcb4_currentIndexChanged"
+QT_MOC_LITERAL(22, 421, 29), // "on_portcb_currentIndexChanged"
+QT_MOC_LITERAL(23, 451, 23) // "on_streamingImg_clicked"
 
     },
     "MainWindow\0updateRawImgFin\0\0"
-    "on_exitButton_clicked\0on_captureButton_clicked\0"
-    "streamImg\0getRawImg\0on_matchRateSlider_sliderMoved\0"
+    "on_exitButton_clicked\0streamImg\0"
+    "getRawImg\0on_matchRateSlider_sliderMoved\0"
     "position\0updateIPResult\0updateResource\0"
     "on_externalButton_pressed\0"
     "on_ResetButton_clicked\0on_leftButton_clicked\0"
@@ -68,7 +68,8 @@ QT_MOC_LITERAL(23, 446, 29) // "on_portcb_currentIndexChanged"
     "on_ipcb2_currentIndexChanged\0"
     "on_ipcb3_currentIndexChanged\0"
     "on_ipcb4_currentIndexChanged\0"
-    "on_portcb_currentIndexChanged"
+    "on_portcb_currentIndexChanged\0"
+    "on_streamingImg_clicked"
 };
 #undef QT_MOC_LITERAL
 
@@ -92,21 +93,21 @@ static const uint qt_meta_data_MainWindow[] = {
        3,    0,  110,    2, 0x08 /* Private */,
        4,    0,  111,    2, 0x08 /* Private */,
        5,    0,  112,    2, 0x08 /* Private */,
-       6,    0,  113,    2, 0x08 /* Private */,
-       7,    1,  114,    2, 0x08 /* Private */,
+       6,    1,  113,    2, 0x08 /* Private */,
+       8,    0,  116,    2, 0x08 /* Private */,
        9,    0,  117,    2, 0x08 /* Private */,
       10,    0,  118,    2, 0x08 /* Private */,
       11,    0,  119,    2, 0x08 /* Private */,
       12,    0,  120,    2, 0x08 /* Private */,
       13,    0,  121,    2, 0x08 /* Private */,
-      14,    0,  122,    2, 0x08 /* Private */,
-      15,    1,  123,    2, 0x08 /* Private */,
-      17,    1,  126,    2, 0x08 /* Private */,
-      19,    1,  129,    2, 0x08 /* Private */,
-      20,    1,  132,    2, 0x08 /* Private */,
-      21,    1,  135,    2, 0x08 /* Private */,
-      22,    1,  138,    2, 0x08 /* Private */,
-      23,    1,  141,    2, 0x08 /* Private */,
+      14,    1,  122,    2, 0x08 /* Private */,
+      16,    1,  125,    2, 0x08 /* Private */,
+      18,    1,  128,    2, 0x08 /* Private */,
+      19,    1,  131,    2, 0x08 /* Private */,
+      20,    1,  134,    2, 0x08 /* Private */,
+      21,    1,  137,    2, 0x08 /* Private */,
+      22,    1,  140,    2, 0x08 /* Private */,
+      23,    0,  143,    2, 0x08 /* Private */,
 
  // signals: parameters
     QMetaType::Void,
@@ -115,21 +116,21 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,    8,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,    7,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   16,
-    QMetaType::Void, QMetaType::QString,   18,
-    QMetaType::Void, QMetaType::QString,   18,
-    QMetaType::Void, QMetaType::QString,   18,
-    QMetaType::Void, QMetaType::QString,   18,
-    QMetaType::Void, QMetaType::QString,   18,
-    QMetaType::Void, QMetaType::QString,   18,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   15,
+    QMetaType::Void, QMetaType::QString,   17,
+    QMetaType::Void, QMetaType::QString,   17,
+    QMetaType::Void, QMetaType::QString,   17,
+    QMetaType::Void, QMetaType::QString,   17,
+    QMetaType::Void, QMetaType::QString,   17,
+    QMetaType::Void, QMetaType::QString,   17,
+    QMetaType::Void,
 
        0        // eod
 };
@@ -142,23 +143,23 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         switch (_id) {
         case 0: _t->updateRawImgFin(); break;
         case 1: _t->on_exitButton_clicked(); break;
-        case 2: _t->on_captureButton_clicked(); break;
-        case 3: _t->streamImg(); break;
-        case 4: _t->getRawImg(); break;
-        case 5: _t->on_matchRateSlider_sliderMoved((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 6: _t->updateIPResult(); break;
-        case 7: _t->updateResource(); break;
-        case 8: _t->on_externalButton_pressed(); break;
-        case 9: _t->on_ResetButton_clicked(); break;
-        case 10: _t->on_leftButton_clicked(); break;
-        case 11: _t->on_rightButton_clicked(); break;
-        case 12: _t->on_tabWidget_currentChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 13: _t->on_factorycb_currentTextChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 14: _t->on_ipcb1_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 15: _t->on_ipcb2_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 16: _t->on_ipcb3_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 17: _t->on_ipcb4_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 18: _t->on_portcb_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 2: _t->streamImg(); break;
+        case 3: _t->getRawImg(); break;
+        case 4: _t->on_matchRateSlider_sliderMoved((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 5: _t->updateIPResult(); break;
+        case 6: _t->updateResource(); break;
+        case 7: _t->on_externalButton_pressed(); break;
+        case 8: _t->on_ResetButton_clicked(); break;
+        case 9: _t->on_leftButton_clicked(); break;
+        case 10: _t->on_rightButton_clicked(); break;
+        case 11: _t->on_tabWidget_currentChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 12: _t->on_factorycb_currentTextChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 13: _t->on_ipcb1_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 14: _t->on_ipcb2_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 15: _t->on_ipcb3_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 16: _t->on_ipcb4_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 17: _t->on_portcb_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 18: _t->on_streamingImg_clicked(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {

@@ -291,6 +291,19 @@
         </rect>
        </property>
       </widget>
+      <widget class="QPushButton" name="exitButton">
+       <property name="geometry">
+        <rect>
+         <x>370</x>
+         <y>40</y>
+         <width>85</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Exit</string>
+       </property>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="CameraTab">
@@ -731,7 +744,7 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QLabel" name="capturedImg1">
+        <widget class="QLabel" name="preCapturedImg">
          <property name="text">
           <string/>
          </property>
@@ -739,60 +752,19 @@
        </item>
       </layout>
      </widget>
-     <widget class="QLabel" name="realtimeImg">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>251</width>
-        <height>191</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
      <widget class="QWidget" name="horizontalLayoutWidget">
       <property name="geometry">
        <rect>
         <x>60</x>
         <y>220</y>
-        <width>271</width>
+        <width>371</width>
         <height>66</height>
        </rect>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="capturedImgLayout">
        <property name="spacing">
         <number>15</number>
        </property>
-       <item>
-        <widget class="QLabel" name="capturedImg2">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="capturedImg3">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="capturedImg4">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="capturedImg5">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="horizontalLayoutWidget_2">
@@ -858,7 +830,7 @@
      <widget class="QPushButton" name="rightButton">
       <property name="geometry">
        <rect>
-        <x>340</x>
+        <x>440</x>
         <y>220</y>
         <width>41</width>
         <height>64</height>
@@ -874,40 +846,18 @@
        <string>▶</string>
       </property>
      </widget>
-     <widget class="QWidget" name="verticalLayoutWidget_2">
+     <widget class="QPushButton" name="streamingImg">
       <property name="geometry">
        <rect>
-        <x>390</x>
-        <y>220</y>
-        <width>87</width>
-        <height>64</height>
+        <x>10</x>
+        <y>20</y>
+        <width>291</width>
+        <height>181</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QPushButton" name="captureButton">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Capture</string>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>24</width>
-           <height>24</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="exitButton">
-         <property name="text">
-          <string>Exit</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <property name="text">
+       <string/>
+      </property>
      </widget>
     </widget>
    </widget>

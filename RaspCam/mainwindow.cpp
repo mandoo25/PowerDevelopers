@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     // init camera
-    this->camTh = new Camera(33, D_CAMEARA_CAPTURE_WIDTH, D_CAMEARA_CAPTURE_HEIGHT);
+    this->camTh = new Camera(D_CAMERA_POLLING_MSEC, D_CAMEARA_CAPTURE_WIDTH, D_CAMEARA_CAPTURE_HEIGHT);
     connect(this->camTh, SIGNAL(captureImg()), this, SLOT(streamImg()));
     this->camTh->start();
 
@@ -72,6 +72,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // setting
     ui->tabWidget->setCurrentIndex(0);
+
+    for(int i = 0 ; i < D_UI_NUMBER_OF_LOWER_UI_IMGS ; i++)
+    {
+        this->capturedImg[i] = new QPushButton();
+        ui->capturedImgLayout->addWidget(this->capturedImg[i]);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -87,17 +93,7 @@ void MainWindow::getRawImg()
 
     data = this->camTh->getCapturedRawImg(&size);
 	
-
-
-    if(this->resourceFin == true)
-    {
-        this->netTh->setRawImgData(data, size, res->getimgIdx(this->curIdx));
-    }
-    else
-    {
-        this->netTh->setRawImgData(data, size, this->curIdx);
-    }
-
+    this->netTh->setRawImgData(data, size, res->getImgIdx(this->curIdx));
 
     emit updateRawImgFin();
 
@@ -110,8 +106,12 @@ void MainWindow::streamImg()
     cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH, D_CAMERA_DISPLAYED_HEIGHT), 0, 0, CV_INTER_LINEAR);
     cv::cvtColor(img, img, CV_BGR2RGB);
 
-    ui->realtimeImg->resize(img.cols, img.rows);
-    ui->realtimeImg->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));
+    QPixmap qimg = QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888));
+    QIcon ButtonIcon(qimg);
+    ui->streamingImg->resize(img.cols, img.rows);
+    ui->streamingImg->setIconSize(qimg.rect().size());
+    ui->streamingImg->setIcon(ButtonIcon);
+
 }
 
 void MainWindow::on_exitButton_clicked()
@@ -124,7 +124,7 @@ void MainWindow::on_exitButton_clicked()
 void MainWindow::updateIPResult()
 {
 	// show result data
-    this->drawImg(0,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.result,false);
+    this->drawImg(true,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.result);
 }
 
 
@@ -133,24 +133,54 @@ void MainWindow::updateResource()
     this->curIdx = 0;   //
     this->maxIdx = res->getSize();
     resourceFin = true;
-
+/*
     for(int i = 0 ; i < MAX_CAPURES - 1 ;i++)
     {
         img[i+1] = res->getData(i, (index+i));
     }
-
+*/
     // update image
-    drawImg(-1,0,0,false,false);
+
 
 }
 
 
-
-void MainWindow::drawImg(int idx,int x, int y, bool result, bool capture)
+void MainWindow::drawImg(bool draw, int x, int y, bool result)
 {
+    cv::Mat img = this->camTh->getCapturedImg();
+    cv::cvtColor(img, img, CV_BGR2RGB);
 
+    cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*4/7, D_CAMERA_DISPLAYED_HEIGHT*4/7), 0, 0, CV_INTER_LINEAR);
+    ui->preCapturedImg->resize(img.cols, img.rows);
+
+    if(draw == true)
+    {
+        if(result == true)
+        {
+            this->buzzerTh->playCaptureResultOKMelody();
+            cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(0,255,0), 10);
+
+            // update img
+            res->setImg(this->curIdx,img);
+            this->curIdx++;
+
+            QString s = QString::number(this->curIdx);
+            ui->curStep->setText(s);
+            updateLowerUI(this->curIdx);
+        }
+        else
+        {
+            this->buzzerTh->playWrongMelody();
+            cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(255,0,0), 10);
+        }
+    }
+
+    ui->preCapturedImg->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));
+
+
+/*
     static int cnt = 1;
-    static int size[][2] =
+    int size[][2] =
     {
         {D_CAMERA_DISPLAYED_WIDTH*4/7, D_CAMERA_DISPLAYED_HEIGHT*4/7},
         {D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11},
@@ -189,6 +219,7 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool capture)
                 QString s = QString::number(this->curIdx+1);
                 ui->curStep->setText(s);
 
+
             }
             else
             {
@@ -213,15 +244,14 @@ void MainWindow::drawImg(int idx,int x, int y, bool result, bool capture)
 		}
 		if(++cnt > (MAX_CAPURES-1)) cnt = MAX_CAPURES;
 	}
+    */
 }
 
-void MainWindow::on_captureButton_clicked()
+void MainWindow::on_streamingImg_clicked()
 {
-    qDebug() << "Capture Button Pressed!!";
     this->buzzerTh->playCaptureMelody();
     this->getRawImg();
-    this->drawImg(-1,0,0, false, true);
-
+    this->drawImg(false,0,0,true);
 }
 
 void MainWindow::on_externalButton_pressed()
@@ -229,7 +259,7 @@ void MainWindow::on_externalButton_pressed()
     this->buzzerTh->playCaptureMelody();
 
     this->getRawImg();
-    this->drawImg(-1,0,0, false, true);
+    this->drawImg(false,0,0,true);
 }
 
 void MainWindow::on_matchRateSlider_sliderMoved(int position)
@@ -251,12 +281,12 @@ void MainWindow::on_leftButton_clicked()
 {
     if(resourceFin == false)    return;
 
-    this->viewIdx--;
+    this->viewIdx -= D_UI_NUMBER_OF_LOWER_UI_IMGS;
     if(viewIdx < 0 )
     {
         viewIdx = 0;
     }
-    updateLowerUI();
+    updateLowerUI(viewIdx);
 }
 
 void MainWindow::on_rightButton_clicked()
@@ -268,19 +298,33 @@ void MainWindow::on_rightButton_clicked()
     {
         viewIdx = MAX_CAPURES - 1;
     }
-    updateLowerUI();
+    updateLowerUI(viewIdx);
 }
 
-void MainWindow::updateLowerUI()
+void MainWindow::updateLowerUI(int indexStart)
 {
     int index;
-    for(int i = 0 ; i < MAX_CAPURES - 1 ;i++)
+    cv::Mat img;
+    for(int i = 0 ; i < D_UI_NUMBER_OF_LOWER_UI_IMGS; i++)
     {
-        img[i+1] = res->getData(i+viewIdx, &index);
-    }
+        if(indexStart + i > res->getSize())
+        {
+            capturedImg[i]->setIcon(QIcon());
+        }
+        else
+        {
+            img = res->getImgAndIdx(i + indexStart, &index);
 
-    // update image
-    drawImg(-1,0,0,false,false);
+            cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*3/11, D_CAMERA_DISPLAYED_HEIGHT*3/11), 0, 0, CV_INTER_LINEAR);
+            cv::cvtColor(img, img, CV_BGR2RGB);
+
+            QPixmap qimg = QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888));
+            QIcon ButtonIcon(qimg);
+            capturedImg[i]->resize(img.cols, img.rows);
+            capturedImg[i]->setIconSize(qimg.rect().size());
+            capturedImg[i]->setIcon(ButtonIcon);
+        }
+    }
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
@@ -388,3 +432,5 @@ void MainWindow::on_portcb_currentIndexChanged(const QString &arg1)
 {
     this->setPort();
 }
+
+
