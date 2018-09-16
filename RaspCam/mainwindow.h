@@ -96,7 +96,7 @@ private:
     int viewIdx;
 
     QPushButton * capturedImg[D_UI_NUMBER_OF_LOWER_UI_IMGS];
-    Mat img[D_UI_NUMBER_OF_LOWER_UI_IMGS];
+    // Mat img[D_UI_NUMBER_OF_LOWER_UI_IMGS];
     int index[D_UI_NUMBER_OF_LOWER_UI_IMGS];
 
     bool resourceFin;
@@ -112,9 +112,7 @@ private:
     void setImgMatchRate();
 
 
-
-
-
+    void imgClickEvent(int idx);
 
 signals :
     void updateRawImgFin();

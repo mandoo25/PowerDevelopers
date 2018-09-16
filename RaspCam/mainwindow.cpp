@@ -91,6 +91,13 @@ MainWindow::MainWindow(QWidget *parent) :
     this->capturedImg[3] = ui->img3;
     this->capturedImg[4] = ui->img4;
 
+    this->curIdx = 0;
+    for(int i = 0; i < D_UI_NUMBER_OF_LOWER_UI_IMGS; i++)
+    {
+        this->index[i] = 0;
+    }
+
+
 /*  test code for image read
     res->pushData(NULL,0,1);
     int index;
@@ -262,12 +269,13 @@ void MainWindow::drawImg(bool draw, int x, int y, bool result)
 }
 void MainWindow::updateLowerUI(int indexStart)
 {
-    int index;
+    int idx;
     cv::Mat img;
 
     for(int i = 0 ; i < D_UI_NUMBER_OF_LOWER_UI_IMGS; i++)
     {
-        img = res->getImgAndIdx(i + indexStart, &index);
+        img = res->getImgAndIdx(i + indexStart, &idx);
+        index[i] = idx;
 
         cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*3/5, D_CAMERA_DISPLAYED_HEIGHT*3/5), 0, 0, CV_INTER_LINEAR);
         cv::cvtColor(img, img, CV_BGR2RGB);
@@ -393,27 +401,39 @@ void MainWindow::on_portcb_currentIndexChanged(const QString &arg1)
 /*
  *      lower img click event
  */
+
+void MainWindow::imgClickEvent(int idx)
+{
+    if( index[idx] > 0 )
+    {
+        this->curIdx = index[idx];
+        QString s = QString::number(this->curIdx);
+        ui->curStep->setText(s);
+        updateLowerUI(this->curIdx);
+    }
+}
+
 void MainWindow::on_img0_clicked()
 {
-
+    imgClickEvent(0);
 }
 
 void MainWindow::on_img1_clicked()
 {
-
+    imgClickEvent(1);
 }
 
 void MainWindow::on_img2_clicked()
 {
-
+    imgClickEvent(2);
 }
 
 void MainWindow::on_img3_clicked()
 {
-
+    imgClickEvent(3);
 }
 
 void MainWindow::on_img4_clicked()
 {
-
+    imgClickEvent(4);
 }

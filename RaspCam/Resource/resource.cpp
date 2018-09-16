@@ -96,6 +96,7 @@ cv::Mat Resource::getImgAndIdx(int idx, int * index)
     if( idx >= imgs.size() || idx < 0)
     {
         img = blank;
+        *index = 0;
     }
     else
     {
