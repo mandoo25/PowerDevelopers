@@ -218,7 +218,7 @@ namespace EfficientApp
         String verificationDirectory = Application.StartupPath + @"\images\verification\";
         String backupDirectory = Application.StartupPath + @"\images\backup\";
         String verificationFile = "verification.jpg";
-        String vppFilePath = @"D:\Source\VisionPro_Test\FrontCover.vpp";
+        String vppFilePath = Application.StartupPath + @"\K595NP.vpp";
         String logBackupPath = Application.StartupPath + @"\LOG";
         private StreamWriter _write;
         private FileStream _fs;
@@ -254,6 +254,12 @@ namespace EfficientApp
         private Label label2;
         private TextBox textBox1;
         private Button DirSelect;
+        private Button DBTest;
+        private GroupBox groupBox2;
+        private Label FileLabel;
+        private TextBox textBox2;
+        private Button VppSelect;
+        private GroupBox groupBox3;
         private Stopwatch stopWatch = new Stopwatch();
 
         //		C# is a multi-threaded language, unlike VB6. Because of this, one must be careful
@@ -467,9 +473,16 @@ namespace EfficientApp
             this.DirSelect = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.DBTest = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.FileLabel = new System.Windows.Forms.Label();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.VppSelect = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.cogRecordDisplay1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PortNumberBox)).BeginInit();
             this.groupBox1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // Label1
@@ -490,12 +503,12 @@ namespace EfficientApp
             // 
             // SampleTextBox
             // 
-            this.SampleTextBox.Location = new System.Drawing.Point(139, 449);
+            this.SampleTextBox.Location = new System.Drawing.Point(139, 536);
             this.SampleTextBox.Multiline = true;
             this.SampleTextBox.Name = "SampleTextBox";
             this.SampleTextBox.ReadOnly = true;
             this.SampleTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.SampleTextBox.Size = new System.Drawing.Size(526, 172);
+            this.SampleTextBox.Size = new System.Drawing.Size(526, 85);
             this.SampleTextBox.TabIndex = 5;
             // 
             // cogRecordDisplay1
@@ -507,7 +520,7 @@ namespace EfficientApp
             this.cogRecordDisplay1.ColorMapUpperRoiLimit = 1D;
             this.cogRecordDisplay1.DoubleTapZoomCycleLength = 2;
             this.cogRecordDisplay1.DoubleTapZoomSensitivity = 2.5D;
-            this.cogRecordDisplay1.Location = new System.Drawing.Point(139, 120);
+            this.cogRecordDisplay1.Location = new System.Drawing.Point(139, 207);
             this.cogRecordDisplay1.MouseWheelMode = Cognex.VisionPro.Display.CogDisplayMouseWheelModeConstants.Zoom1;
             this.cogRecordDisplay1.MouseWheelSensitivity = 1D;
             this.cogRecordDisplay1.Name = "cogRecordDisplay1";
@@ -599,6 +612,7 @@ namespace EfficientApp
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.groupBox2);
             this.groupBox1.Controls.Add(this.DirSelect);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.textBox1);
@@ -637,10 +651,70 @@ namespace EfficientApp
             this.textBox1.TabIndex = 0;
             this.textBox1.Text = logBackupPath;
             // 
+            // DBTest
+            // 
+            this.DBTest.Location = new System.Drawing.Point(513, 60);
+            this.DBTest.Name = "DBTest";
+            this.DBTest.Size = new System.Drawing.Size(75, 23);
+            this.DBTest.TabIndex = 14;
+            this.DBTest.Text = "DB Test";
+            this.DBTest.UseVisualStyleBackColor = true;
+            this.DBTest.Click += new System.EventHandler(this.DBTest_Click);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Location = new System.Drawing.Point(3, 64);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(471, 53);
+            this.groupBox2.TabIndex = 3;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "groupBox2";
+            // 
+            // FileLabel
+            // 
+            this.FileLabel.AutoSize = true;
+            this.FileLabel.Location = new System.Drawing.Point(9, 17);
+            this.FileLabel.Name = "FileLabel";
+            this.FileLabel.Size = new System.Drawing.Size(54, 12);
+            this.FileLabel.TabIndex = 15;
+            this.FileLabel.Text = "File Path";
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(71, 14);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(289, 21);
+            this.textBox2.TabIndex = 16;
+            this.textBox2.Text = vppFilePath;
+            // 
+            // VppSelect
+            // 
+            this.VppSelect.Location = new System.Drawing.Point(378, 12);
+            this.VppSelect.Name = "VppSelect";
+            this.VppSelect.Size = new System.Drawing.Size(75, 23);
+            this.VppSelect.TabIndex = 17;
+            this.VppSelect.Text = "...";
+            this.VppSelect.UseVisualStyleBackColor = true;
+            this.VppSelect.Click += new System.EventHandler(this.VppSelect_Click);
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.FileLabel);
+            this.groupBox3.Controls.Add(this.VppSelect);
+            this.groupBox3.Controls.Add(this.textBox2);
+            this.groupBox3.Location = new System.Drawing.Point(12, 103);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(474, 45);
+            this.groupBox3.TabIndex = 18;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Vpp File";
+            // 
             // Form1
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
             this.ClientSize = new System.Drawing.Size(959, 633);
+            this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.DBTest);
             this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.OutputTextBox);
@@ -659,6 +733,8 @@ namespace EfficientApp
             ((System.ComponentModel.ISupportInitialize)(this.PortNumberBox)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1051,6 +1127,141 @@ namespace EfficientApp
             return respAck;
         }
 
+        public RespAck CogActJudgement(ref ReqCmd reqCmd)
+        {
+            RespAck respAck = new RespAck();
+            string sql;
+            MySqlCommand cmd;
+            string process = null;
+
+            respAck.action_type = reqCmd.action_type;
+            respAck.item_id = reqCmd.item_id;
+            respAck.cell_number = reqCmd.cell_number;
+            respAck.process_number = reqCmd.process_number;
+            respAck.data_size = 0;
+
+            sql = "SELECT Process FROM processnum WHERE Value=" + string.Format("{0}",reqCmd.process_number);
+            cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            bool ResultExist = false;
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            if(reader.HasRows)
+            {
+                reader.Read();
+                process = reader.GetString(0);
+                ResultExist = true;
+            }
+            reader.Close();
+
+            if (!ResultExist)
+            {
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.info, string.Format("Wrong Process Num!! : {0}", reqCmd.process_number));
+
+                return respAck;
+            }
+
+            sql = "SELECT * from process WHERE Type='" + reqCmd.product_str + "'" + " AND Process='" + process + "'";
+            cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            int seqCount = 0;
+            int[] seqArr = new int[255];
+
+            ResultExist = false;
+            reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                ResultExist = true;
+
+                reader.Read();
+
+                for(int i=2; i<reader.VisibleFieldCount; i++)
+                {                    
+                    if (reader.IsDBNull(i) != true && reader.GetInt32(i) != 0)
+                    {
+                        seqArr[seqCount] = reader.GetInt32(i);
+                        seqCount++;
+                    }
+                }                
+            }
+            reader.Close();
+
+            if(!ResultExist)
+            {
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.info, "Wrong Process!! : " + reqCmd.product_str + " " + process);
+
+                return respAck;
+            }
+
+            sql = "SELECT * from resultcheck WHERE SerialNumber='" + reqCmd.serial_str + "'";
+            cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            int resultCnt = 0;
+            int[] resultArr = new int[255];
+
+            ResultExist = false;
+            reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                ResultExist = true;
+
+                reader.Read();
+
+                for(int i=1; i<reader.VisibleFieldCount; i++)
+                {                    
+                    if (reader.IsDBNull(i) != true)
+                    {
+                        resultArr[resultCnt] = reader.GetInt32(i);
+                        resultCnt++;
+                    }
+                }                
+            }
+            reader.Close();
+
+            if(!ResultExist)
+            {
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.info, "Never Worked!! : " + reqCmd.serial_str);
+
+                return respAck;
+            }
+
+            bool check_ok = true;
+            for (int i = 0; i < seqCount; i++)
+            {
+                if(resultArr[seqArr[i]-1] == 0)
+                {
+                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                    print_log((byte)LogType.info, string.Format("Item was not checked!! : {0}", seqArr[i]));
+                    check_ok = false;
+                }                
+            }
+
+            if (check_ok)
+            {
+                print_log((byte)LogType.info, string.Format("Every Check Items are OK!"));
+                //MessageBox.Show(resultId);
+                UpdateGUI(string.Format("Every Check Items are OK!"));
+
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+            }
+            else
+            {
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.info, string.Format("At last one more check item remains."));
+            }
+
+            return respAck;
+        }
+
         public RespAck CogActBarcode2D(ReqCmd reqCmd)
         {
             RespAck respAck = new RespAck();
@@ -1242,6 +1453,10 @@ namespace EfficientApp
                                                     respAck = CogActExist(ref reqCmd);
                                                     break;
 
+                                                case (byte)ActionType.judgement:
+                                                    respAck = CogActJudgement(ref reqCmd);
+                                                    break;
+
                                                 default:
                                                     break;
                                             }
@@ -1295,9 +1510,13 @@ namespace EfficientApp
                             netStream.Write(responseBuffer, 0, responseBuffer.Length);                            
                             netStream.Flush();
 
-                            if(respAck.cmd_type == (byte)CmdType.CMD_TYPE_ACK && reqCmd.product_str != null && reqCmd.serial_str != null)
+                            if (respAck.cmd_type == (byte)CmdType.CMD_TYPE_ACK && reqCmd.product_str != null &&
+                                reqCmd.serial_str != null && reqCmd.action_type != (byte)ActionType.judgement)
                             {
                                 string result_detail;
+                                MySqlCommand cmd;
+                                string sql;
+
                                 if(respAck.data_size == 0)
                                 {
                                     result_detail = "OK";
@@ -1307,10 +1526,11 @@ namespace EfficientApp
                                     result_detail = respAck.data;
                                 }
 
+                                /* LOG INSERT */
                                 //MySqlCommand mySqlCommand = mySqlConn.CreateCommand();
                                 //mySqlCommand.CommandText = "insert into k595np values('"+reqCmd.product_str+"', '"+reqCmd.serial_str+"', '"+respAck.action_type+"', '"+respAck.item_id+"', '"+result_detail+"', '"+ reqCmd.cur_date + "', '"+reqCmd.start_time+"', '"+reqCmd.end_time+"', '"+reqCmd.due_msec+"', '"+reqCmd.cell_number+"', '"+reqCmd.process_number+"', '"+reqCmd.saveFilePath+"');";
-                                string sql = "INSERT into log VALUES(@ProductCode, @SerialNum, @ActionType, @WorkItems, @ResultDetail, @CheckDate, @StartTime, @EndTime, @TimeDiff, @CheckCell, @CheckProcess, @BackupImagePath);";
-                                MySqlCommand cmd = new MySqlCommand(sql, mySqlConn);
+                                sql = "INSERT into log VALUES(@ProductCode, @SerialNum, @ActionType, @WorkItems, @ResultDetail, @CheckDate, @StartTime, @EndTime, @TimeDiff, @CheckCell, @CheckProcess, @BackupImagePath);";
+                                cmd = new MySqlCommand(sql, mySqlConn);
                                 cmd.Parameters.AddWithValue("@ProductCode", reqCmd.product_str);
                                 cmd.Parameters.AddWithValue("@SerialNum", reqCmd.serial_str);
                                 cmd.Parameters.AddWithValue("@ActionType", respAck.action_type);
@@ -1323,7 +1543,30 @@ namespace EfficientApp
                                 cmd.Parameters.AddWithValue("@CheckCell", reqCmd.cell_number);
                                 cmd.Parameters.AddWithValue("@CheckProcess", reqCmd.process_number);
                                 cmd.Parameters.AddWithValue("@BackupImagePath", reqCmd.saveFilePath);
+                                cmd.ExecuteNonQuery();
 
+                                /* RESULT UPDATE */
+                                sql = "SELECT * FROM resultcheck WHERE SerialNumber='" + reqCmd.serial_str + "'";
+                                cmd = new MySqlCommand(sql, mySqlConn);
+                                
+                                cmd.ExecuteNonQuery();
+
+                                bool ResultExist = false;
+                                MySqlDataReader reader = cmd.ExecuteReader();
+                                ResultExist = reader.HasRows;
+                                reader.Close();
+
+                                if (!ResultExist)
+                                {
+                                    sql = "INSERT INTO resultcheck (SerialNumber) VALUES(@SerialNum)";
+                                    cmd = new MySqlCommand(sql, mySqlConn);
+
+                                    cmd.Parameters.AddWithValue("@SerialNum", reqCmd.serial_str);
+                                    cmd.ExecuteNonQuery();
+                                }
+
+                                sql = "UPDATE resultcheck SET WorkItem" + respAck.item_id + "=1 " + "WHERE SerialNumber='" + reqCmd.serial_str + "';";
+                                cmd = new MySqlCommand(sql, mySqlConn);
                                 cmd.ExecuteNonQuery();
                             }
                         }
@@ -1375,7 +1618,7 @@ namespace EfficientApp
             MySqlDataReader reader;
             string value_str = null;
 
-            sql = "SELECT WorkItem" + reqCmd.item_id + " from producttable WHERE Product='" + reqCmd.product_str + "'";
+            sql = "SELECT " + reqCmd.product_str + " from producttable WHERE WorkItemID='" + reqCmd.item_id + "'";
             cmd = new MySqlCommand(sql, mySqlConn);
 
             cmd.ExecuteNonQuery();
@@ -1404,15 +1647,30 @@ namespace EfficientApp
                     value_str = reader.GetString(0);
                 }
                 reader.Close();
-            }
 
-            if (value_str.Equals(respAck.data))
-            {
-                rtn = true;
-            }
-            else
-            {
-                rtn = false;
+                if (reqCmd.item_id == 111)
+                {
+                    if(value_str.Substring(0,4).Equals(respAck.data.Substring(0,4)))
+                    {
+                        rtn = true;
+                    }
+                    else
+                    {
+                        rtn = false;
+                    }
+
+                }
+                else
+                {
+                    if (value_str.Equals(respAck.data))
+                    {
+                        rtn = true;
+                    }
+                    else
+                    {
+                        rtn = false;
+                    }
+                }
             }
 
             return rtn;
@@ -1508,6 +1766,8 @@ namespace EfficientApp
                 checkBox1.Enabled = false;
                 textBox1.Enabled = false;
                 DirSelect.Enabled = false;
+                textBox2.Enabled = false;
+                VppSelect.Enabled = false;
 
                 myJobManager = (CogJobManager)CogSerializer.LoadObjectFromFile(vppFilePath);
 
@@ -1531,6 +1791,8 @@ namespace EfficientApp
                 checkBox1.Enabled = true;
                 textBox1.Enabled = true;
                 DirSelect.Enabled = true;
+                textBox2.Enabled = true;
+                VppSelect.Enabled = true;
                 StopServer();
             }
         }
@@ -1547,6 +1809,49 @@ namespace EfficientApp
 
             textBox1.Text = dialog.SelectedPath;
 
+        }
+
+        private void DBTest_Click(object sender, EventArgs e)
+        {
+            int count = 0;
+            MySqlConnection mySqlConn;
+            string MyConString = "Server=10.1.31.105; Port=3308; Database=k595np; Uid=root; Password=root; SslMode=none; charset=utf8";
+            mySqlConn = new MySqlConnection(MyConString);
+            mySqlConn.Open();            
+            
+            string sql = "SELECT * from process WHERE Type='" + "3029C003AA" + "'" + " AND Process='" + "F2" + "'";
+            MySqlCommand cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            MySqlDataReader reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                reader.Read();
+
+                for(int i=3; i<reader.VisibleFieldCount; i++)
+                {                    
+                    if (reader.IsDBNull(i) != true && reader.GetInt32(i) != 0)
+                    {
+                        count++;
+                    }
+                }                
+            }
+            reader.Close();
+        }
+
+        private void VppSelect_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+
+            dialog.Filter = "Vpp File (*.vpp)|*.vpp;";
+            dialog.AddExtension = true;
+            dialog.Title = "QuickBuild VPP File Select";            
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox2.Text = dialog.FileName;
+                vppFilePath = textBox2.Text;
+            }
         }
     }
 }
