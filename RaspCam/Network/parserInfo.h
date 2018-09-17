@@ -18,7 +18,8 @@ using namespace std;
 
 #define D_HEADER_SIZE 11
 #define D_MAX_PROC_SEQ 255
-#define D_MAX_ORD_NUM 128
+#define D_MAX_ORD_NUM 10
+#define D_MAX_RESP_NUM 128
 
 typedef int (*callbackFunc)(void *param);
 
@@ -83,7 +84,7 @@ typedef enum work_type
 
 typedef enum jobStatus
 {
-	JS_IDLE,
+    JS_IDLE = 0x00,
 	JS_READY,
 	JS_PROCESSING,
 	JS_ERROR,

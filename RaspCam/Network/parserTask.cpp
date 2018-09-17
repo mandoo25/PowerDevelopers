@@ -27,6 +27,7 @@ queue<jobInfo_t *> job_list;
 //mutex mutex_;
 //condition_variable cond_;
 static jobInfo_t *currentJobData = nullptr;
+static char resp_buff[D_MAX_RESP_NUM];
 static char order_num[D_MAX_ORD_NUM];
 static tcp_client comm;
 static jobStatus_t State;
@@ -43,6 +44,8 @@ extern int buildPacket(packInfo_tx *info);
 bool parsePacket(packInfo_rx *info, char *data);
 bool verifyPackInfo(packInfo_rx *info);
 void test_makeRAWdata(char *img, unsigned int *size);
+static int setProcSequence(void);
+int notifyNumOfProcessSeq(char *PS, unsigned int *cnt);
 Network *netHander;
 
 extern int transfer_data_proc(void)
@@ -57,7 +60,7 @@ extern int transfer_data_proc(void)
 
     host = "10.1.31.105";
 
-    State = JS_READY;
+    //State = JS_READY;
 
 #if 0
 	//connect to host
@@ -75,11 +78,12 @@ extern int transfer_data_proc(void)
 		cout << "waiting" << endl;
 	}
 #endif
+    //if reset
 
 #if 1
     if(!job_list.empty())
 	{
-        State = JS_PROCESSING;
+        //State = JS_PROCESSING;
 
         qDebug() <<"Entered hostname : 10.1.31.57:5001";
 
@@ -150,10 +154,20 @@ int receiveFunc(char *data)
 		{
 			if(info->item_id == WORK_ORDER)
 			{
-                strncpy(order_num, info->data, info->data_size);
+                //91 0913C006 92 BA 21YBN01115
+                strncpy(resp_buff, info->data, info->data_size);
+
+                unsigned int i =0, j =2;
+                do{
+                    if(j == 10) j += 2;
+                    order_num[i++] = resp_buff[j++];
+                }while(i < 10);
+                order_num[i] = '\0';
+                printf("current Model num of order: %s\n", order_num);
+                //State = JS_READY;
+                setProcSequence();
 			}
-			/* do something * */
-            printf("current Model num of order: %s\n", order_num);
+			/* do something * */            
             netHander->setIpResults(200, 300, 1);
 
             deleteJob(currentJobData);
@@ -331,12 +345,11 @@ extern int transfer_proc_init(void)
 
     memset(proc_seq_table, 0, sizeof(proc_seq_table)); //reset buffer to restore proc sequence table
     memset(proc_seq_order, 0, sizeof(proc_seq_order));
+    memset(resp_buff, 0, D_MAX_RESP_NUM);
     memset(order_num, 0, D_MAX_ORD_NUM);
     totalTbCounter = 0;
     procCounter = 0;
     State = JS_IDLE;
-
-    cout << "total qurery list counter: " << totalTbCounter <<endl;
 
     /*
     for(int iq = 0; iq < totalTbCounter; iq++)
@@ -353,11 +366,20 @@ int setProcSequence(void)
 {
     int ret = -1;
 
-    char *ordernum = "3029C003AA";
+    //91 0913C006 92 BA 21YBN01115
+    //char *ordernum = "3029C003AA";
     char *process = "M1";
-    ret = getProcessSeqFromDB(ordernum, process);
+    ret = getProcessSeqFromDB(order_num, process);
     if(ret > 0)
+    {
+        for(unsigned int i =0; i<totalTbCounter; i++)
+        {
+            netHander->res->pushData(NULL, 0, proc_seq_order[i]);
+            printf("sq:%d @ %d\n", i, proc_seq_order[i]);
+        }
+        emit netHander->resourceUpdateFin();
         State = JS_READY;
+    }
     else
         State = JS_ERROR;
 
@@ -402,18 +424,21 @@ int setProcSequence(void)
 int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
 {
 
-    printf("requestAnalysisToServer: %d\n", idx);
+    printf("requestAnalysisToServer: %d /JobState: %d\n", idx, State);
     int ret = 0;
-
-    if(State == JS_IDLE && idx == 0)
+    if(State == JS_ERROR)
+    {
+        return -1;
+    }
+    else if(State == JS_IDLE && idx == 0)
     {
         //just one time at beginning proc to get order number.
         packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
         memset(pack, 0, sizeof(packInfo_tx));
 
         pack->cmd_type = CMD_TYPE_REQUEST; //fixed
-        pack->action_type = WORK_ORDER;
-        pack->item_id = ACT_BARCODE1D;
+        pack->action_type = ACT_BARCODE1D;
+        pack->item_id = WORK_ORDER;
         pack->cell_num = 1;
         pack->process_num = 1; //would it be got from db server
         pack->accuracy = 100; //will set it from UI
@@ -422,7 +447,7 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
         pack->image_data = (char*)image;
         buildPacket(pack);
     }
-    else if(State == JS_READY)
+    else if(State >= JS_READY)
     {
         if(proc_seq_table[procCounter].action_type == idx && procCounter <= totalTbCounter)
             {
@@ -447,10 +472,13 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
 
                 procCounter++;
 
+                State = JS_PROCESSING;
+
             }
             else
             {
                 cout <<"ERROR: Wrong sequence! "<<endl;
+                State = JS_ERROR;
                 ret = -1;
             }
     }
@@ -463,15 +491,26 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
     return ret;
 }
 
-int notifyNumOfProcessSeq(char **PS, unsigned int *cnt)
+int notifyNumOfProcessSeq(char *PS, unsigned int *cnt)
 {
     int ret = -1;
     cout << "notify number of proc seq" << endl;
-    if(*PS != nullptr){
-        memcpy(*PS, proc_seq_order, D_MAX_PROC_SEQ);
+
+    if(PS != nullptr){
+        memcpy(PS, proc_seq_order, D_MAX_PROC_SEQ);
         *cnt = totalTbCounter;
         ret = 1;
     }
     return ret;
 }
+
+
+
+
+
+
+
+
+
+
 

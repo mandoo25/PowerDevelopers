@@ -50,6 +50,7 @@ public:
     // rate : image match rate
     void setImgRate(int rate);
     int getImgRate(void);
+    Resource * res;
 
 
 private:
@@ -71,8 +72,7 @@ private:
 	int rawDataImgSize;
     int rawDataIndex;
 
-    static Network net_instance;
-    Resource * res;
+    static Network net_instance;    
 	
 	
 

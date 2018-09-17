@@ -9,6 +9,7 @@ extern void setNetworkHandler(Network* net);
 extern int transfer_proc_init(void);
 extern int transfer_data_proc(void);
 extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx);
+extern int notifyNumOfProcessSeq(char *PS, unsigned int *cnt);
 
 Network::Network(unsigned int msecPollingPeriod, Resource * res)
 {
@@ -81,36 +82,25 @@ void Network::sendRawImgData()
    //data*
    qDebug() << this->rawDataImgSize << endl;
 
-   requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, 0); //index will be switched by step .
-
-
-
+   unsigned int cntOfProcSeq =0;
+   int idx =this->rawDataIndex;
+   requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, idx); //index will be switched by step .
 #if 0
-   packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
-   //memset(pack, 0, sizeof(packInfo_tx));
+   int idx =this->rawDataIndex;
+   if(idx == 0)
+   {       
+       char *procSeq = (char *)malloc(sizeof(char)*D_MAX_PROC_SEQ);
 
-   pack->cmd_type = CMD_TYPE_REQUEST; //fixed
+       //shoud be call this for getting proc seq
+       notifyNumOfProcessSeq(procSeq, &cntOfProcSeq);
+       for(int i =0; i<cntOfProcSeq; i++)
+       {
+           res->pushData(NULL, 0, procSeq[i]);
+           printf("sq:%d $ %d\n", i, procSeq[i]);
+       }
+       free(procSeq);
+   }
 
-   pack->action_type = ACT_BARCODE1D;
-   pack->item_id = WORK_ORDER;
-
-   pack->cell_num = 1;
-   pack->process_num = 1;
-
-   pack->accuracy = 100;
-
-   pack->order_size = 0;
-   //pack.image_size = this->rawDataImg->size();
-   //pack.image_data = (char *)this->rawDataImg;
-   //pack.image_data = reinterpret_cast<char*>(this->rawDataImg->data());
-   pack->image_size = this->rawDataImgSize;
-   pack->image_data = (char*)this->rawDataImg;
-   //qDebug() << "image data handler: "<< pack.image_data <<endl;
-   //printf("?????: %d\n", this->rawDataImg);
-   printf("image size : %d\n", pack->image_size);
-   
-   printf("%p\n", pack);
-   buildPacket(pack);
 #endif
 
 
@@ -118,10 +108,11 @@ void Network::sendRawImgData()
 
 void Network::setIpResults(int x, int y, bool res)
 {
+
     printf("network::setIpResults\n");
     this->ipResult.x = x;
     this->ipResult.y = y;
-    this->ipResult.result = res;
+    this->ipResult.result = res;  
 }
 
 
@@ -134,7 +125,7 @@ void Network::setServerIpAddress(char * ip)
     this->settingMutex.unlock();
 }
 
-char * Network::getServerIpAddress()
+char * Network::getServerIpAddress()  //////////
 {
     // wait
     this->settingMutex.lock();
@@ -151,7 +142,7 @@ void Network::setPort(int port)
     this->settingMutex.unlock();
 }
 
-int Network::getPort()
+int Network::getPort()   /////////
 {
     // wait
     this->settingMutex.lock();
@@ -170,7 +161,7 @@ void Network::setProcess(char * proc)
     this->settingMutex.unlock();
 }
 
-char * Network::getProcess()
+char * Network::getProcess() ///////
 {
     // wait
     this->settingMutex.lock();
@@ -187,7 +178,7 @@ void Network::setImgRate(int rate)
     this->settingMutex.unlock();
 }
 
-int Network::getImgRate(void)
+int Network::getImgRate(void) ////////
 {
     // wait
     this->settingMutex.lock();

@@ -28,7 +28,7 @@
 // define types
 typedef unsigned char byte;
 
-#define IMAGE_BASE_FOLDER_PATH  "Network/"
+#define IMAGE_BASE_FOLDER_PATH  "Images/"
 
 
 #endif // CONFIG_H

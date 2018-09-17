@@ -164,6 +164,7 @@ void MainWindow::on_exitButton_clicked()
 void MainWindow::updateIPResult()
 {
 	// show result data
+    qDebug() << "result";
     this->drawImg(true,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.result);
 }
 
