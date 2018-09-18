@@ -445,7 +445,8 @@ buzzer.o: Hardware/Buzzer/buzzer.cpp Hardware/Buzzer/buzzer.h \
 key.o: Hardware/Key/key.cpp Hardware/Key/key.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o key.o Hardware/Key/key.cpp
 
-resource.o: Resource/resource.cpp Resource/resource.h
+resource.o: Resource/resource.cpp Resource/resource.h \
+		config.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o resource.o Resource/resource.cpp
 
 parsemysql.o: Network/parsemysql.cpp Network/parsemysql.h \

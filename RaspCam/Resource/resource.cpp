@@ -45,7 +45,6 @@ void Resource::pushData(char * data, int size, int index)
         s.append(".jpg");
         std::string utf8_text = s.toUtf8().constData();
         img = cv::imread(utf8_text);
-
         if(img.empty())
         {
             qDebug() << "fail to read file :" <<s;
@@ -62,6 +61,8 @@ void Resource::pushData(char * data, int size, int index)
 
     this->imgs.append(img);
     this->indexs.append(index);
+
+
 
     this->mutex.unlock();
 }
@@ -116,10 +117,8 @@ int Resource::getIndexOf(int idx)
 
     this->mutex.lock();
 
-    if(this->indexs.size() > idx )
-    {
-        index = this->indexs.indexOf(idx);
-    }
+    index = this->indexs.indexOf(idx);
+
 
     this->mutex.unlock();
 

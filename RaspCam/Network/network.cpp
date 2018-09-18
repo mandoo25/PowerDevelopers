@@ -152,6 +152,25 @@ char * Network::getProcess() ///////
     return this->process;
 }
 
+
+void Network::setCellInfo(char * info)
+{
+    // process m1, m2 ...   
+	if(strlen(info) >= 20) return;	
+    this->settingMutex.lock();
+    strcpy(this->cellInfo,info);
+    this->settingMutex.unlock();
+}
+
+char * Network::getCellInfo() ///////
+{
+    // wait
+    this->settingMutex.lock();
+    this->settingMutex.unlock();
+
+    return this->cellInfo;
+}
+
 // rate : image match rate
 void Network::setImgRate(int rate)
 {

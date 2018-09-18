@@ -74,6 +74,8 @@ private slots:
     void on_img3_clicked();
     void on_img4_clicked();
 
+    void on_cellinfocb_currentTextChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
     Camera * camTh = NULL;
@@ -107,6 +109,9 @@ private:
 
     void setProcess();
     QString process;
+
+    void setCellInfo();
+    QString cellInfo;
 
     void setPort();
     void setImgMatchRate();

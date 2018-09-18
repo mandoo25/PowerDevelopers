@@ -91,6 +91,9 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 	
 	ui->factorycb->setCurrentIndex(ui->factorycb->findText("M1"));
+
+    ui->cellinfocb->addItem("111");
+    ui->cellinfocb->setCurrentIndex(ui->cellinfocb->findText("111"));
 	
     // setting
     ui->tabWidget->setCurrentIndex(0);
@@ -121,6 +124,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->preCapturedImg->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));
     */
 
+    // test code for push data
+    /*
+	res->pushData(NULL,0,11);
+	res->pushData(NULL,0,12);
+	res->pushData(NULL,0,13);
+	res->pushData(NULL,0,14);
+	res->pushData(NULL,0,15);
+    */
     updateLowerUI(0);
 }
 
@@ -304,6 +315,7 @@ void MainWindow::updateLowerUI(int indexStart)
     {
         img = res->getImgAndIdx(i + indexStart, &idx);
         index[i] = idx;
+        // qDebug() << "updateLowerUI:" << index[i];
 
         cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*3/5, D_CAMERA_DISPLAYED_HEIGHT*3/5), 0, 0, CV_INTER_LINEAR);
         cv::cvtColor(img, img, CV_BGR2RGB);
@@ -394,12 +406,31 @@ void MainWindow::setProcess()   // test ok
     netTh->setProcess(tempQs.data());
 }
 
+void MainWindow::setCellInfo()   // test ok
+{
+    if(this->netTh == NULL) return;
+
+    cellInfo.clear();
+
+    cellInfo.append(ui->cellinfocb->currentText());
+
+    // qDebug() << process;
+
+    tempQs = cellInfo.toLatin1();
+
+    netTh->setCellInfo(tempQs.data());
+}
 
 
 void MainWindow::on_factorycb_currentTextChanged(const QString &arg1)
 {
     // qDebug() << arg1;
     this->setProcess();
+}
+
+void MainWindow::on_cellinfocb_currentTextChanged(const QString &arg1)
+{
+    this->setCellInfo();
 }
 
 /*
@@ -442,12 +473,16 @@ void MainWindow::imgClickEvent(int idx)
         // this->curIdx = index[idx];		
         int newindex = this->res->getIndexOf(index[idx]);
 		qDebug() << idx << ":" << newindex;
-        this->curIdx = newindex;
-		this->viewIdx = this->curIdx;
-        QString s = "STEP ";
-        s.append(QString::number(this->curIdx));
-        ui->curStep->setText(s);
-        updateLowerUI(this->curIdx);
+
+        if(newindex != -1)
+        {
+            this->curIdx = newindex;
+            this->viewIdx = this->curIdx;
+            QString s = "STEP ";
+            s.append(QString::number(this->curIdx+1));
+            ui->curStep->setText(s);
+            updateLowerUI(this->curIdx);
+        }
     }
 }
 
@@ -475,4 +510,6 @@ void MainWindow::on_img4_clicked()
 {
     imgClickEvent(4);
 }
+
+
 
