@@ -28,7 +28,7 @@
 // define types
 typedef unsigned char byte;
 
-#define IMAGE_BASE_FOLDER_PATH  "Images/"
+#define IMAGE_BASE_FOLDER_PATH  "/home/pi/src/Prj/PowerDevelopers/RaspCam/Images/"
 
 
 #endif // CONFIG_H
