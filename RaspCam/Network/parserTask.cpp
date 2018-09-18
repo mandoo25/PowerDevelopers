@@ -27,7 +27,7 @@ queue<jobInfo_t *> job_list;
 //mutex mutex_;
 //condition_variable cond_;
 static jobInfo_t *currentJobData = nullptr;
-static char resp_buff[D_MAX_RESP_NUM];
+static char full_order_num[D_MAX_RESP_NUM];
 static char order_num[D_MAX_ORD_NUM];
 static tcp_client comm;
 static jobStatus_t State;
@@ -46,22 +46,44 @@ bool verifyPackInfo(packInfo_rx *info);
 void test_makeRAWdata(char *img, unsigned int *size);
 static int setProcSequence(void);
 int notifyNumOfProcessSeq(char *PS, unsigned int *cnt);
+void transfer_proc_updateConfig(void);
+void transfer_proc_reset(void);
+
 Network *netHander;
+string host;
+unsigned int port;
+unsigned int accuracy_rate;
+char seProc_step[12];
+unsigned int seProc_value;
+
+int chcekUpdatedUserConfig(void)
+{
+    int ret =0;
+    if(netHander->userSettingFlag)
+    {
+        ret = 1;
+        netHander->userSettingFlag = 0;
+    }
+    return ret;
+}
+
+int chcekUserReset(void)
+{
+    int ret =0;
+    if(netHander->resetFlag)
+    {
+        ret = 1;
+        netHander->resetFlag = 0;
+    }
+    return ret;
+}
 
 extern int transfer_data_proc(void)
 {
 
 	int rval;
     //tcp_client comm;
-	string host;
-
-    //qDebug() <<"Entered hostname : 10.1.31.57:5001";
-    //cin>>host;
-
-    host = "10.1.31.105";
-
-    //State = JS_READY;
-
+    /*host = "10.1.31.105";*/
 #if 0
 	//connect to host
 	rval = comm.conn(host , 5001);
@@ -79,16 +101,26 @@ extern int transfer_data_proc(void)
 	}
 #endif
     //if reset
+    if( chcekUserReset() == true )
+    {
+        cout << "checked User Reset!" <<endl;
+        transfer_proc_reset();
+    }
+    //else if changed configure
+    if(chcekUpdatedUserConfig() == true )
+    {
+        cout << "checked update configuration" << endl;
+        transfer_proc_updateConfig();
+    }
+
 
 #if 1
     if(!job_list.empty())
 	{
         //State = JS_PROCESSING;
-
-        qDebug() <<"Entered hostname : 10.1.31.57:5001";
-
+        cout <<"Entered hostname : "<<host<<":"<<port<<endl;
         //connect to host
-        rval = comm.conn(host , 5001);
+        rval = comm.conn(host , port);
         if(rval < 0){
             cout << "connection fail" <<endl;
             State = JS_ERROR;
@@ -128,6 +160,7 @@ int receiveFunc(char *data)
 	cout << "[call]" << __FUNCTION__ <<endl;
 
     packInfo_rx *info = (packInfo_rx*)malloc(sizeof(packInfo_rx));
+    memset(info, 0, sizeof(packInfo_rx));
 
 	ret = parsePacket(info, data);
 	if(ret != true)
@@ -139,7 +172,7 @@ int receiveFunc(char *data)
 	printf("____ recieved packet ___\n");
 	printf("info->cmd_type: %x\n", info->cmd_type);
 	printf("info->action_type: %x\n", info->action_type);
-	printf("info->work_type: %x\n", info->item_id);
+    printf("info->item id: %x\n", info->item_id);
 	printf("info->cell_num: %x\n", info->cell_num);
 	printf("info->process_num: %x\n", info->process_num);
 	printf("info->coord_x: %d\n", info->coordinate_x);
@@ -155,12 +188,12 @@ int receiveFunc(char *data)
 			if(info->item_id == WORK_ORDER)
 			{
                 //91 0913C006 92 BA 21YBN01115
-                strncpy(resp_buff, info->data, info->data_size);
+                strncpy(full_order_num, info->data, info->data_size);
 
                 unsigned int i =0, j =2;
                 do{
                     if(j == 10) j += 2;
-                    order_num[i++] = resp_buff[j++];
+                    order_num[i++] = full_order_num[j++];
                 }while(i < 10);
                 order_num[i] = '\0';
                 printf("current Model num of order: %s\n", order_num);
@@ -216,10 +249,12 @@ int buildPacket(packInfo_tx *info)
 	memcpy(&rq_data[D_HEADER_SIZE+info->order_size], \
 										info->image_data, info->image_size);
 
+    printf("_______ send packet _______\n");
 	printf("cmd: %d\n", info->cmd_type);
 	printf("action: %d\n", info->action_type);
-	printf("work: %d\n", info->item_id);
+    printf("item id: %d\n", info->item_id);
 	printf("size: %d\n", info->image_size);
+    printf("--------------------------\n");
 
     jobInfo_t *newJob = (jobInfo_t *)malloc(sizeof(jobInfo_t));	
 	newJob->txData = rq_data;
@@ -267,7 +302,8 @@ bool parsePacket(packInfo_rx *info, char *data)
 		memcpy(&info->coordinate_y, &rs_data[9], sizeof(char)*4);
 		info->matching_rate = rs_data[13];
 		info->data_size = rs_data[14];
-        memcpy(info->data, &rs_data[15], sizeof(char)*info->data_size);
+        if(info->data_size > 0)
+            memcpy(info->data, &rs_data[15], sizeof(char)*info->data_size);
 	}
     else
     {
@@ -345,21 +381,46 @@ extern int transfer_proc_init(void)
 
     memset(proc_seq_table, 0, sizeof(proc_seq_table)); //reset buffer to restore proc sequence table
     memset(proc_seq_order, 0, sizeof(proc_seq_order));
-    memset(resp_buff, 0, D_MAX_RESP_NUM);
+    memset(full_order_num, 0, D_MAX_RESP_NUM);
     memset(order_num, 0, D_MAX_ORD_NUM);
     totalTbCounter = 0;
     procCounter = 0;
     State = JS_IDLE;
 
-    /*
-    for(int iq = 0; iq < totalTbCounter; iq++)
-    {
-        printf("proc table: %d\n", proc_seq_table[iq].action_type);
-        printf("item id: %d\n", proc_seq_table[iq].item_id);
-    }
-    */
-
     return ret;
+}
+
+void transfer_proc_reset(void)
+{
+    transfer_proc_init();
+}
+
+void transfer_proc_updateConfig(void)
+{
+    char hostaddr[16];
+    char *addr = netHander->getServerIpAddress();
+    if(addr != nullptr)
+    {
+        strcpy(hostaddr, addr);
+        host.assign(hostaddr, strlen(hostaddr));
+    }
+    port = netHander->getPort();
+    accuracy_rate = netHander->getImgRate();
+    char *proc = netHander->getProcess();
+    if(proc != nullptr)
+    {
+        strcpy(seProc_step, proc);
+    }
+
+    seProc_value = getProcNumFromDB(seProc_step);
+
+    cout << "----set user config----" <<endl;
+    cout << "host addr: "<< host<< endl;
+    cout << "host port: "<< port<< endl;
+    cout << "accuracy: " << accuracy_rate <<endl;
+    cout << "proc num: " <<seProc_step<<"["<<seProc_value<<"]"<<endl;
+    cout << "-----------------------" <<endl;
+
 }
 
 int setProcSequence(void)
@@ -368,8 +429,9 @@ int setProcSequence(void)
 
     //91 0913C006 92 BA 21YBN01115
     //char *ordernum = "3029C003AA";
-    char *process = "M1";
-    ret = getProcessSeqFromDB(order_num, process);
+    //char *process = "M1";
+
+    ret = getProcessSeqFromDB(order_num, seProc_step);
     if(ret > 0)
     {
         for(unsigned int i =0; i<totalTbCounter; i++)
@@ -418,9 +480,7 @@ int setProcSequence(void)
 		}
  */
 
-//packInfo_tx proc_seq_table[D_MAX_PROC_SEQ];
-//unsigned int tableCounter;
-//unsigned int procCounter = 0;
+
 int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
 {
 
@@ -440,7 +500,7 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
         pack->action_type = ACT_BARCODE1D;
         pack->item_id = WORK_ORDER;
         pack->cell_num = 1;
-        pack->process_num = 1; //would it be got from db server
+        pack->process_num = seProc_value; //would it be got from db server
         pack->accuracy = 100; //will set it from UI
         pack->order_size = 0;  //will have to make it from pack
         pack->image_size = size;
@@ -449,7 +509,7 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
     }
     else if(State >= JS_READY)
     {
-        if(proc_seq_table[procCounter].action_type == idx && procCounter <= totalTbCounter)
+        if(/*proc_seq_table[procCounter].action_type == idx && procCounter <= totalTbCounter*/1) //fixme
             {
                 packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
                 memset(pack, 0, sizeof(packInfo_tx));
@@ -461,9 +521,10 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
                 pack->item_id = proc_seq_table[procCounter].item_id;
 
                 pack->cell_num = 1;
-                pack->process_num = 1; //would it be got from db server
-                pack->accuracy = 100; //will set it from UI
-                pack->order_size = 0;  //will have to make it from pack
+                pack->process_num = seProc_value; //would it be got from db server
+                pack->accuracy = accuracy_rate; //will set it from UI
+                pack->order_size = strlen(full_order_num);  //will have to make it from pack
+                strncpy(pack->order_num, full_order_num, pack->order_size);
                 pack->image_size = size;
                 pack->image_data = (char*)image;
 

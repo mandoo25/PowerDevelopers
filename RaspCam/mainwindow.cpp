@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+	// ip combo box
     for(int i = 0 ; i <= 255 ; i++)
     {
         QString s = QString::number(i);
@@ -66,8 +67,15 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->ipcb4->addItem(s);
     }
 
-    ui->portcb->addItem("8080");
+	// defulat server ip : 10.1.31.105
+	ui->ipcb1->setCurrentIndex(ui->ipcb1->findText("10"));
+	ui->ipcb2->setCurrentIndex(ui->ipcb2->findText("1"));
+	ui->ipcb3->setCurrentIndex(ui->ipcb3->findText("31"));
+	ui->ipcb4->setCurrentIndex(ui->ipcb4->findText("105"));
+	
+    ui->portcb->addItem("5001");
 
+	// factory process
     for(int i = 1 ; i <= 5 ; i++)
     {
         QString s = "M";
@@ -81,7 +89,9 @@ MainWindow::MainWindow(QWidget *parent) :
         s.append(QString::number(i));
         ui->factorycb->addItem(s);
     }
-
+	
+	ui->factorycb->setCurrentIndex(ui->factorycb->findText("M1"));
+	
     // setting
     ui->tabWidget->setCurrentIndex(0);
 
@@ -205,13 +215,23 @@ void MainWindow::on_matchRateSlider_sliderMoved(int position)
 void MainWindow::on_ResetButton_clicked()
 {
     this->curIdx = 0;
+	this->viewIdx = 0;
+	this->res->clear();
+	
+	this->netTh->resetFlag = true;
+	
+	for(int i = 0 ; i < D_UI_NUMBER_OF_LOWER_UI_IMGS; i++)
+	{
+		index[i] = 0;
+	}
+	updateLowerUI(viewIdx);
 }
 
 void MainWindow::on_leftButton_clicked()
 {
     if(resourceFin == false)    return;
 
-    this->viewIdx -= D_UI_NUMBER_OF_LOWER_UI_IMGS;
+    this->viewIdx -= 1;//D_UI_NUMBER_OF_LOWER_UI_IMGS;
     if(viewIdx < 0 )
     {
         viewIdx = 0;
@@ -223,10 +243,10 @@ void MainWindow::on_rightButton_clicked()
 {
     if(resourceFin == false)    return;
 
-    this->viewIdx += D_UI_NUMBER_OF_LOWER_UI_IMGS;
-    if(viewIdx > this->res->getSize() - D_UI_NUMBER_OF_LOWER_UI_IMGS)
+    this->viewIdx += 1;//D_UI_NUMBER_OF_LOWER_UI_IMGS;
+    if(viewIdx > this->res->getSize() - 1)//D_UI_NUMBER_OF_LOWER_UI_IMGS)
     {
-        viewIdx = this->res->getSize() - D_UI_NUMBER_OF_LOWER_UI_IMGS;
+        viewIdx = this->res->getSize() -1;//- D_UI_NUMBER_OF_LOWER_UI_IMGS;
         if(viewIdx < 0 ) viewIdx = 0;
     }
 
@@ -252,10 +272,15 @@ void MainWindow::drawImg(bool draw, int x, int y, bool result)
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(0,255,0), 10);
 
             // update img
-            res->setImg(this->curIdx,img);
+			if(this->curIdx != 0)
+			{
+				res->setImg(this->curIdx,img);
+			}
+            
             this->curIdx++;
 
-            QString s = QString::number(this->curIdx);
+            QString s = "STEP ";
+			s.append(QString::number(this->curIdx));
             ui->curStep->setText(s);
             updateLowerUI(this->curIdx);
         }
@@ -273,6 +298,8 @@ void MainWindow::updateLowerUI(int indexStart)
     int idx;
     cv::Mat img;
 
+	this->viewIdx = indexStart;
+	
     for(int i = 0 ; i < D_UI_NUMBER_OF_LOWER_UI_IMGS; i++)
     {
         img = res->getImgAndIdx(i + indexStart, &idx);
@@ -296,6 +323,11 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
     this->camTh->enableStreaming(camEnable);
 
+	if(index == 1)
+	{
+		this->netTh->userSettingFlag = true;
+	}
+	
 }
 
 void MainWindow::setIpAddress() // test ok
@@ -407,8 +439,13 @@ void MainWindow::imgClickEvent(int idx)
 {
     if( index[idx] > 0 )
     {
-        this->curIdx = index[idx];
-        QString s = QString::number(this->curIdx);
+        // this->curIdx = index[idx];		
+        int newindex = this->res->getIndexOf(index[idx]);
+		qDebug() << idx << ":" << newindex;
+        this->curIdx = newindex;
+		this->viewIdx = this->curIdx;
+        QString s = "STEP ";
+        s.append(QString::number(this->curIdx));
         ui->curStep->setText(s);
         updateLowerUI(this->curIdx);
     }
@@ -438,3 +475,4 @@ void MainWindow::on_img4_clicked()
 {
     imgClickEvent(4);
 }
+

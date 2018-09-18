@@ -51,6 +51,10 @@ public:
     void setImgRate(int rate);
     int getImgRate(void);
     Resource * res;
+	
+	
+	bool resetFlag;
+	bool userSettingFlag;
 
 
 private:

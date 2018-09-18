@@ -123,8 +123,8 @@ int getProcessSeqFromDB(const char *ordernum, const char *process)
                 unsigned int procnum = (unsigned int)atoi(value_string);
                 int workitem = getWorkitemsFromDB(connection, procnum);
                 if(workitem != -1){
-                    proc_seq_table[totalTbCounter].action_type = procnum;
-                    proc_seq_table[totalTbCounter].item_id = workitem;
+                    proc_seq_table[totalTbCounter].action_type = workitem;
+                    proc_seq_table[totalTbCounter].item_id = procnum;
                     proc_seq_order[totalTbCounter] = procnum;
                     totalTbCounter++;
                 }
@@ -142,5 +142,49 @@ int getProcessSeqFromDB(const char *ordernum, const char *process)
     mysql_disconnect();
 
     return 1;
+
+}
+
+unsigned int getProcNumFromDB(const char *procnum)
+{
+    unsigned int ret =0;
+
+    //connect to mysql server
+    mysql_connect();
+
+    char *sql_query_text = "SELECT Value FROM processnum WHERE Process='%s'";
+    char *query_string = (char *)malloc(strlen(sql_query_text)+6);
+    sprintf(query_string, sql_query_text, procnum);
+    cout << "proc num query: <<" << query_string << ">>" <<endl;
+
+    //Send query to database
+    query_state = mysql_query(connection, query_string);
+    if(query_state != 0)
+    {
+        cout << " mysql_query failure" <<endl;
+        return -1;
+    }
+
+    // store result
+    MYSQL_RES *qresult = mysql_store_result(connection);
+    if (qresult != NULL)
+    {
+        MYSQL_ROW row;			//An array of strings
+        if(row = mysql_fetch_row(qresult))
+        {
+            char *value_string = row[0];
+            if(value_string != nullptr){
+                ret = (unsigned int)atoi(value_string);
+                printf( "got proc num :%d\n", ret);
+            }
+        }
+        mysql_free_result(qresult);
+    }
+
+    free(query_string);
+
+    mysql_disconnect();
+
+    return ret;
 
 }

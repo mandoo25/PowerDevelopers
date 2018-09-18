@@ -31,7 +31,7 @@ typedef struct transPackinfo {
 	unsigned char process_num;
 	unsigned char accuracy;
 	unsigned char order_size;
-	char          *order_num;
+    char          order_num[D_MAX_RESP_NUM];
 	unsigned int  image_size;
 	char          *image_data;
 
@@ -47,7 +47,7 @@ typedef struct revPackinfo {
 	unsigned int coordinate_y;
 	unsigned char matching_rate;
 	unsigned char data_size;
-    char          data[128];
+    char          data[D_MAX_RESP_NUM];
 
 
 }packInfo_rx;

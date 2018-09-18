@@ -17,6 +17,8 @@ Network::Network(unsigned int msecPollingPeriod, Resource * res)
     this->_exit = false;
 
     this->res = res;
+	this->resetFlag = false;
+	this->userSettingFlag = false;
 	
     // plz write somthing want to initialize
     setNetworkHandler(this);
@@ -42,7 +44,10 @@ void Network::run()
     {
 
         // interrupt : updateRawImg
-        // emit updateRawImg();        
+        // emit updateRawImg();
+        // reset case : flag
+        // user config chagned: flag
+
         transfer_data_proc();
 
         //emit imgProcessFin();
@@ -77,33 +82,11 @@ uchar * Network::getRawImgData(void)
 void Network::sendRawImgData()
 {
     // plz fill out code
-    //packinfo
 
-   //data*
-   qDebug() << this->rawDataImgSize << endl;
+    //qDebug() << this->rawDataImgSize << endl;
 
-   unsigned int cntOfProcSeq =0;
    int idx =this->rawDataIndex;
    requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, idx); //index will be switched by step .
-#if 0
-   int idx =this->rawDataIndex;
-   if(idx == 0)
-   {       
-       char *procSeq = (char *)malloc(sizeof(char)*D_MAX_PROC_SEQ);
-
-       //shoud be call this for getting proc seq
-       notifyNumOfProcessSeq(procSeq, &cntOfProcSeq);
-       for(int i =0; i<cntOfProcSeq; i++)
-       {
-           res->pushData(NULL, 0, procSeq[i]);
-           printf("sq:%d $ %d\n", i, procSeq[i]);
-       }
-       free(procSeq);
-   }
-
-#endif
-
-
 }
 
 void Network::setIpResults(int x, int y, bool res)
@@ -120,7 +103,7 @@ void Network::setServerIpAddress(char * ip)
 {
     // 192.168.000.001 = 3*4 + 3 = 12 + 3 = 15 + 1(NULL)
     if(strlen(ip) > 15) return;
-    this->settingMutex.lock();
+    this->settingMutex.lock();    
     strcpy(this->ipAddress,ip);
     this->settingMutex.unlock();
 }
@@ -130,7 +113,6 @@ char * Network::getServerIpAddress()  //////////
     // wait
     this->settingMutex.lock();
     this->settingMutex.unlock();
-
     return this->ipAddress;
 }
 

@@ -109,12 +109,33 @@ cv::Mat Resource::getImgAndIdx(int idx, int * index)
     return img;
 
 }
+
+int Resource::getIndexOf(int idx)
+{
+    int index = 0;
+
+    this->mutex.lock();
+
+    if(this->indexs.size() > idx )
+    {
+        index = this->indexs.indexOf(idx);
+    }
+
+    this->mutex.unlock();
+
+    return index;
+}
+
 void Resource::setImg(int idx, cv::Mat img)
 {
     this->mutex.lock();
 
-    this->imgs.removeAt(idx);
-    this->imgs.insert(idx,img);
+    if(this->indexs.size() > idx )
+    {
+        this->imgs.removeAt(idx);
+        this->imgs.insert(idx,img);
+    }
+
 
     this->mutex.unlock();
 }

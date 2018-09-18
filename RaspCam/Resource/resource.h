@@ -31,6 +31,7 @@ public:
     void updateImg(int idx,cv::Mat img);
 
     int getSize();
+    int getIndexOf(int idx);
 
 
 private:
