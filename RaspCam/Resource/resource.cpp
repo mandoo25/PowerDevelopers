@@ -50,19 +50,18 @@ void Resource::pushData(char * data, int size, int index)
             qDebug() << "fail to read file :" <<s;
             return;
         }
+        cv::cvtColor(img, img, CV_BGR2RGB);
 
     }
     else
     {
-        img = cv::imdecode(cv::Mat(1, size, CV_8UC1, data), CV_LOAD_IMAGE_UNCHANGED);
+        img = cv::imdecode(cv::Mat(1, size, CV_8UC1, data), CV_LOAD_IMAGE_UNCHANGED);        
     }
 
     this->mutex.lock();
 
     this->imgs.append(img);
     this->indexs.append(index);
-
-
 
     this->mutex.unlock();
 }
@@ -86,6 +85,11 @@ void Resource::updateImg(int idx,cv::Mat img)
     this->imgs.insert(idx,img);
 
     this->mutex.unlock();
+}
+
+cv::Mat Resource::getClearImg()
+{
+    return blank;
 }
 
 cv::Mat Resource::getImgAndIdx(int idx, int * index)

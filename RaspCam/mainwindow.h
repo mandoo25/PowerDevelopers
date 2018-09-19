@@ -119,6 +119,8 @@ private:
 
     void imgClickEvent(int idx);
 
+    bool waitForResponse;
+
 signals :
     void updateRawImgFin();
 };
