@@ -91,6 +91,7 @@ private:
     QPoint m_up;
 
     Resource * res;
+	cv::Mat preCapturedMatImg;
 
 
     int curIdx;
