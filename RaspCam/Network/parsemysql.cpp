@@ -15,7 +15,7 @@ static int getWorkitemsFromDB(MYSQL *mysql, const unsigned int step);
 extern packInfo_tx proc_seq_table[D_MAX_PROC_SEQ];
 extern unsigned int totalTbCounter;
 extern unsigned char proc_seq_order[D_MAX_PROC_SEQ];
-
+extern std::list<packInfo_tx *> actionlist;
 
 int mysql_connect(void)
 {
@@ -126,7 +126,10 @@ int getProcessSeqFromDB(const char *ordernum, const char *process)
                     proc_seq_table[totalTbCounter].action_type = workitem;
                     proc_seq_table[totalTbCounter].item_id = procnum;
                     proc_seq_order[totalTbCounter] = procnum;
+                    actionlist.push_back(&(proc_seq_table[totalTbCounter]));
+
                     totalTbCounter++;
+
                 }
 
                 idx++;

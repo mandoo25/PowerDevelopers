@@ -11,6 +11,7 @@
 #include <iostream>
 //#include <string>
 #include <cstring>
+#include <list>
 //#include "network.h"
 
 

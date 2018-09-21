@@ -56,6 +56,12 @@ unsigned int accuracy_rate;
 char seProc_step[12];
 unsigned int seProc_value;
 
+std::list<packInfo_tx *> actionlist;
+std::list<packInfo_tx *>::iterator its;
+std::list<packInfo_tx *>::iterator iStart = actionlist.begin();
+std::list<packInfo_tx *>::iterator iEnd = actionlist.end();
+
+
 int chcekUpdatedUserConfig(void)
 {
     int ret =0;
@@ -84,6 +90,11 @@ extern int transfer_data_proc(void)
 	int rval;
     //tcp_client comm;
     /*host = "10.1.31.105";*/
+
+
+    setProcSequence();
+
+    return 1;
 #if 0
 	//connect to host
 	rval = comm.conn(host , 5001);
@@ -428,10 +439,10 @@ int setProcSequence(void)
     int ret = -1;
 
     //91 0913C006 92 BA 21YBN01115
-    //char *ordernum = "3029C003AA";
-    //char *process = "M1";
+    char *ordernum_a = "3029C003AA";
+    char *process = "M1";
 
-    ret = getProcessSeqFromDB(order_num, seProc_step);
+    ret = getProcessSeqFromDB(ordernum_a, process);
     if(ret > 0)
     {
         for(unsigned int i =0; i<totalTbCounter; i++)
@@ -444,6 +455,26 @@ int setProcSequence(void)
     }
     else
         State = JS_ERROR;
+
+#if 1
+    iStart = actionlist.begin();
+    iEnd = actionlist.end();
+
+    for(its=iStart; its != iEnd; ++its)
+    {
+       /* if((*it)->getActorId() == searchId)
+        {
+            printf("found: %d\n", (*it)->id);
+            actionlist..erase(it);
+            break;
+        }
+        else
+            cout <<"couldn't find that"<<endl;
+        */
+        cout << "ddddddddddd" << (*its)->item_id <<endl;
+
+    }
+#endif
 
     return ret;
 }
@@ -566,7 +597,71 @@ int notifyNumOfProcessSeq(char *PS, unsigned int *cnt)
 }
 
 
+#if 0
+#include <list>
 
+class actor{
+public:
+    int id;
+
+public:
+    int getActorId(){return id;};
+
+};
+
+std::list<actor *> actorlist;
+
+std::list<actor *>::iterator it;
+std::list<actor *>::iterator iStart = actorlist.begin();
+std::list<actor *>::iterator iEnd = actorlist.end();
+
+//std::list::remove;
+
+void testLinkedList(void)
+{
+    int searchId =100;
+
+    actor ia, ib, ic, id, ie;
+    ia.id = 1;
+    ib.id = 10;
+    ic.id = 100;
+    id.id = 1000;
+    ie.id = 10000;
+
+    actorlist.push_back(&ia);
+    actorlist.push_back(&ib);
+    actorlist.push_back(&ic);
+    actorlist.push_back(&id);
+    actorlist.push_back(&ie);
+
+    iStart = actorlist.begin();
+    iEnd = actorlist.end();
+
+    for(it=iStart; it != iEnd; ++it)
+    {
+        if((*it)->getActorId() == searchId)
+        {
+            printf("found: %d\n", (*it)->id);
+            actorlist.erase(it);
+            break;
+        }
+        else
+            cout <<"couldn't find that"<<endl;
+
+    }
+
+    iStart = actorlist.begin();
+    iEnd = actorlist.end();
+
+    printf("start log\n");
+    for(it = iStart; it !=iEnd; ++it)
+    {
+        printf("it's %d\n", (*it)->id);
+    }
+
+}
+
+#endif
 
 
 
