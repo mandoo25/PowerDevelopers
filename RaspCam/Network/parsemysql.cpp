@@ -117,7 +117,11 @@ int getProcessSeqFromDB(const char *ordernum, const char *process)
             static int idx =2;
             do{
                 char *value_string = row[idx];
-                if(value_string == nullptr) break;
+                if(value_string == nullptr)
+				{
+					idx++;
+					continue;
+				}
                 //printf( "process Seq value ::%s\n", value_string);
 
                 unsigned int procnum = (unsigned int)atoi(value_string);

@@ -34,6 +34,9 @@ public:
     int getIndexOf(int idx);
 
 
+    cv::Mat getClearImg();
+
+
 private:
 
 

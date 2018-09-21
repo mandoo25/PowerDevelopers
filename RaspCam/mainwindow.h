@@ -91,6 +91,7 @@ private:
     QPoint m_up;
 
     Resource * res;
+	cv::Mat preCapturedMatImg;
 
 
     int curIdx;
@@ -118,6 +119,8 @@ private:
 
 
     void imgClickEvent(int idx);
+
+    bool waitForResponse;
 
 signals :
     void updateRawImgFin();
