@@ -67,11 +67,11 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->ipcb4->addItem(s);
     }
 
-	// defulat server ip : 10.1.31.105
-	ui->ipcb1->setCurrentIndex(ui->ipcb1->findText("10"));
-	ui->ipcb2->setCurrentIndex(ui->ipcb2->findText("1"));
-	ui->ipcb3->setCurrentIndex(ui->ipcb3->findText("31"));
-	ui->ipcb4->setCurrentIndex(ui->ipcb4->findText("105"));
+    // defulat server ip : 192.168.1.137
+    ui->ipcb1->setCurrentIndex(ui->ipcb1->findText("192"));
+    ui->ipcb2->setCurrentIndex(ui->ipcb2->findText("168"));
+    ui->ipcb3->setCurrentIndex(ui->ipcb3->findText("1"));
+    ui->ipcb4->setCurrentIndex(ui->ipcb4->findText("137"));
 	
     ui->portcb->addItem("5001");
 
@@ -82,6 +82,8 @@ MainWindow::MainWindow(QWidget *parent) :
         s.append(QString::number(i));
         ui->factorycb->addItem(s);
     }
+	
+	ui->factorycb->addItem("FC");
 
     for(int i = 1 ; i <= 3 ; i++)
     {
@@ -89,6 +91,8 @@ MainWindow::MainWindow(QWidget *parent) :
         s.append(QString::number(i));
         ui->factorycb->addItem(s);
     }
+	
+	ui->factorycb->addItem("FC");
 	
 	ui->factorycb->setCurrentIndex(ui->factorycb->findText("M1"));
 
@@ -156,6 +160,9 @@ void MainWindow::getRawImg()
 	uchar * data;
 
     data = this->camTh->getCapturedRawImg(&size);
+	this->preCapturedMatImg = this->camTh->getCapturedImg();
+	
+	qDebug() << "[ui->net]index : " << this->curIdx << "," << res->getImgIdx(this->curIdx);
 	
     this->netTh->setRawImgData(data, size, res->getImgIdx(this->curIdx));
 
@@ -204,7 +211,7 @@ void MainWindow::updateResource()
 
 void MainWindow::on_streamingImg_clicked()
 {
-    if (waitForResponse == false)
+    if (waitForResponse == false && ui->tabWidget->currentIndex() == 1)
     {
         this->buzzerTh->playCaptureMelody();
         this->getRawImg();
@@ -261,7 +268,7 @@ void MainWindow::on_leftButton_clicked()
 {
     if(resourceFin == false)    return;
 
-    this->viewIdx -= 1;//D_UI_NUMBER_OF_LOWER_UI_IMGS;
+    this->viewIdx -= D_UI_NUMBER_OF_LOWER_UI_IMGS;//D_UI_NUMBER_OF_LOWER_UI_IMGS;
     if(viewIdx < 0 )
     {
         viewIdx = 0;
@@ -273,7 +280,7 @@ void MainWindow::on_rightButton_clicked()
 {
     if(resourceFin == false)    return;
 
-    this->viewIdx += 1;
+    this->viewIdx += D_UI_NUMBER_OF_LOWER_UI_IMGS;
     if(viewIdx > this->res->getSize() - 1)
     {
         viewIdx = this->res->getSize() -1;
@@ -286,7 +293,7 @@ void MainWindow::on_rightButton_clicked()
 
 void MainWindow::drawImg(bool draw, int x, int y, bool result)
 {
-    cv::Mat img = this->camTh->getCapturedImg();
+    cv::Mat img = this->preCapturedMatImg; //this->camTh->getCapturedImg();
     cv::cvtColor(img, img, CV_BGR2RGB);
 
     cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*4/7, D_CAMERA_DISPLAYED_HEIGHT*4/7), 0, 0, CV_INTER_LINEAR);
@@ -305,7 +312,7 @@ void MainWindow::drawImg(bool draw, int x, int y, bool result)
                 res->setImg(this->curIdx,img);
 			}
 
-            this->curIdx++;
+            this->curIdx++;			
             QString s = "";
             if(this->curIdx >= this->res->getSize())
             {
@@ -319,7 +326,16 @@ void MainWindow::drawImg(bool draw, int x, int y, bool result)
             }
 
             ui->curStep->setText(s);
-            updateLowerUI(this->curIdx);
+			
+			if(this->curIdx % D_UI_NUMBER_OF_LOWER_UI_IMGS == 0)
+			{
+				updateLowerUI(this->curIdx);
+			}
+			else
+			{
+				updateLowerUI(-1);
+			}
+            
 
         }
         else
@@ -333,10 +349,20 @@ void MainWindow::drawImg(bool draw, int x, int y, bool result)
 }
 void MainWindow::updateLowerUI(int indexStart)
 {
-    int idx;
+    static int preIdx = 0;
+	int idx;
     cv::Mat img;
 
+	indexStart = indexStart == -1 ? preIdx : indexStart;
+	
 	this->viewIdx = indexStart;
+	
+	qDebug() << "start" << indexStart;
+	
+	//this->viewIdx = indexStart == -1 ? preIndex : indexStart;
+	//indexStart = indexStart == -1 ? preIndex : indexStart;
+	
+	qDebug() << "start" << indexStart;
 	
     for(int i = 0 ; i < D_UI_NUMBER_OF_LOWER_UI_IMGS; i++)
     {
@@ -347,7 +373,7 @@ void MainWindow::updateLowerUI(int indexStart)
         // cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*3/7, D_CAMERA_DISPLAYED_HEIGHT*3/7), 0, 0, CV_INTER_LINEAR);
         // cv::cvtColor(img, img, CV_BGR2RGB);
         qDebug() << capturedImg[i]->size().width() << ","<< capturedImg[i]->height();
-        cv::resize(img, img, Size(capturedImg[i]->size().width(), capturedImg[i]->height()), 0, 0, CV_INTER_LINEAR);
+        cv::resize(img, img, Size(capturedImg[i]->width(), capturedImg[i]->height()), 0, 0, CV_INTER_LINEAR);
 
         QPixmap qimg = QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888));
         QIcon ButtonIcon(qimg);
@@ -355,6 +381,8 @@ void MainWindow::updateLowerUI(int indexStart)
         capturedImg[i]->setIconSize(qimg.rect().size());
         capturedImg[i]->setIcon(ButtonIcon);
     }
+	
+	preIdx = indexStart;
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)

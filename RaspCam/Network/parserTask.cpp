@@ -56,6 +56,12 @@ unsigned int accuracy_rate;
 char seProc_step[12];
 unsigned int seProc_value;
 
+std::list<packInfo_tx *> actionlist;
+std::list<packInfo_tx *>::iterator its;
+std::list<packInfo_tx *>::iterator iStart = actionlist.begin();
+std::list<packInfo_tx *>::iterator iEnd = actionlist.end();
+
+
 int chcekUpdatedUserConfig(void)
 {
     int ret =0;
@@ -84,6 +90,7 @@ extern int transfer_data_proc(void)
 	int rval;
     //tcp_client comm;
     /*host = "10.1.31.105";*/
+
 #if 0
 	//connect to host
 	rval = comm.conn(host , 5001);
@@ -428,8 +435,8 @@ int setProcSequence(void)
     int ret = -1;
 
     //91 0913C006 92 BA 21YBN01115
-    //char *ordernum = "3029C003AA";
-    //char *process = "M1";
+   // char *ordernum_a = "3029C003AA";
+   // char *process = "M1";
 
     ret = getProcessSeqFromDB(order_num, seProc_step);
     if(ret > 0)
@@ -439,11 +446,36 @@ int setProcSequence(void)
             netHander->res->pushData(NULL, 0, proc_seq_order[i]);
             printf("sq:%d @ %d\n", i, proc_seq_order[i]);
         }
+        iStart = actionlist.begin();
+        iEnd = actionlist.end();
+
         emit netHander->resourceUpdateFin();
         State = JS_READY;
+
+
     }
     else
         State = JS_ERROR;
+
+#if 0
+
+
+    for(its=iStart; its != iEnd; ++its)
+    {
+       /* if((*it)->getActorId() == searchId)
+        {
+            printf("found: %d\n", (*it)->id);
+            actionlist..erase(it);
+            break;
+        }
+        else
+            cout <<"couldn't find that"<<endl;
+        */
+
+        printf("+++++++++++: %d\n", (*its)->item_id);
+
+    }
+#endif
 
     return ret;
 }
@@ -480,12 +512,35 @@ int setProcSequence(void)
 		}
  */
 
+int findWorkIdentity(unsigned char idx, char *act_type, char *item_id)
+{
+    int ret = 0;
+
+    for(its=iStart; its != iEnd; ++its)
+    {
+        if((*its)->item_id == idx)
+        {
+            printf("found: %d\n", (*its)->item_id);
+            printf("found: %d\n", (*its)->action_type);
+            //actionlist.erase(its);
+            *act_type = (*its)->action_type;
+            *item_id = (*its)->item_id;
+
+            ret = 1;
+            break;
+        }
+    }
+    return ret;
+
+}
 
 int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
 {
 
     printf("requestAnalysisToServer: %d /JobState: %d\n", idx, State);
     int ret = 0;
+    char act_type =0, item_id = 0;
+
     if(State == JS_ERROR)
     {
         return -1;
@@ -509,7 +564,8 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
     }
     else if(State >= JS_READY)
     {
-        if(/*proc_seq_table[procCounter].action_type == idx && procCounter <= totalTbCounter*/1) //fixme
+
+        if(findWorkIdentity(idx, &act_type, &item_id))
             {
                 packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
                 memset(pack, 0, sizeof(packInfo_tx));
@@ -517,8 +573,8 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
                 pack->cmd_type = CMD_TYPE_REQUEST; //fixed
                 //pack->action_type = ACT_BARCODE1D;
                 //pack->item_id = WORK_ORDER;
-                pack->action_type = proc_seq_table[procCounter].action_type;
-                pack->item_id = proc_seq_table[procCounter].item_id;
+                pack->action_type = act_type; //proc_seq_table[procCounter].action_type;
+                pack->item_id = item_id; //proc_seq_table[procCounter].item_id;
 
                 pack->cell_num = 1;
                 pack->process_num = seProc_value; //would it be got from db server
@@ -531,7 +587,7 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
                 printf("%p\n", pack);
                 buildPacket(pack);
 
-                procCounter++;
+                //procCounter++;
 
                 State = JS_PROCESSING;
 
@@ -566,7 +622,71 @@ int notifyNumOfProcessSeq(char *PS, unsigned int *cnt)
 }
 
 
+#if 0
+#include <list>
 
+class actor{
+public:
+    int id;
+
+public:
+    int getActorId(){return id;};
+
+};
+
+std::list<actor *> actorlist;
+
+std::list<actor *>::iterator it;
+std::list<actor *>::iterator iStart = actorlist.begin();
+std::list<actor *>::iterator iEnd = actorlist.end();
+
+//std::list::remove;
+
+void testLinkedList(void)
+{
+    int searchId =100;
+
+    actor ia, ib, ic, id, ie;
+    ia.id = 1;
+    ib.id = 10;
+    ic.id = 100;
+    id.id = 1000;
+    ie.id = 10000;
+
+    actorlist.push_back(&ia);
+    actorlist.push_back(&ib);
+    actorlist.push_back(&ic);
+    actorlist.push_back(&id);
+    actorlist.push_back(&ie);
+
+    iStart = actorlist.begin();
+    iEnd = actorlist.end();
+
+    for(it=iStart; it != iEnd; ++it)
+    {
+        if((*it)->getActorId() == searchId)
+        {
+            printf("found: %d\n", (*it)->id);
+            actorlist.erase(it);
+            break;
+        }
+        else
+            cout <<"couldn't find that"<<endl;
+
+    }
+
+    iStart = actorlist.begin();
+    iEnd = actorlist.end();
+
+    printf("start log\n");
+    for(it = iStart; it !=iEnd; ++it)
+    {
+        printf("it's %d\n", (*it)->id);
+    }
+
+}
+
+#endif
 
 
 
