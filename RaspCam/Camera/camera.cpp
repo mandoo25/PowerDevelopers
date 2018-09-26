@@ -112,7 +112,11 @@ void Camera::enableStreaming(bool enable)
 void Camera::run()
 {
     cv::Mat img;
-
+	
+	cam.grab();
+	cam.retrieve(img);
+	this->updateImg(img);
+	
     while(!this->_exit)
     {
         // qDebug() << "Cam Th";

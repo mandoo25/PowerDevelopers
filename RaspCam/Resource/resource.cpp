@@ -147,7 +147,7 @@ int Resource::getImgIdx(int idx)
 {
     int index;
 
-    idx = idx - 1;
+    // idx = idx - 1;
     if(idx < 0 ) return 0;
 
     this->mutex.lock();

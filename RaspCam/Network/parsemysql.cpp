@@ -109,12 +109,13 @@ int getProcessSeqFromDB(const char *ordernum, const char *process)
         //Get the number of columns
         int num_rows = mysql_num_rows(result); //row
         int num_fields = mysql_num_fields(result); //column
-        //cout << "field num: "<< num_fields <<endl;
+        cout << "field num: "<< num_fields <<endl;
 
         MYSQL_ROW row;			//An array of strings
         while( (row = mysql_fetch_row(result)) )
         {
-            static int idx =2;
+            int idx =2;
+
             do{
                 char *value_string = row[idx];
                 if(value_string == nullptr)
@@ -122,7 +123,7 @@ int getProcessSeqFromDB(const char *ordernum, const char *process)
 					idx++;
 					continue;
 				}
-                //printf( "process Seq value ::%s\n", value_string);
+                printf( "process Seq value ::%s\n", value_string);
 
                 unsigned int procnum = (unsigned int)atoi(value_string);
                 int workitem = getWorkitemsFromDB(connection, procnum);
