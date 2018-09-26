@@ -67,11 +67,11 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->ipcb4->addItem(s);
     }
 
-	// defulat server ip : 10.1.31.105
-	ui->ipcb1->setCurrentIndex(ui->ipcb1->findText("10"));
-	ui->ipcb2->setCurrentIndex(ui->ipcb2->findText("1"));
-	ui->ipcb3->setCurrentIndex(ui->ipcb3->findText("31"));
-	ui->ipcb4->setCurrentIndex(ui->ipcb4->findText("105"));
+    // defulat server ip : 192.168.1.137
+    ui->ipcb1->setCurrentIndex(ui->ipcb1->findText("192"));
+    ui->ipcb2->setCurrentIndex(ui->ipcb2->findText("168"));
+    ui->ipcb3->setCurrentIndex(ui->ipcb3->findText("1"));
+    ui->ipcb4->setCurrentIndex(ui->ipcb4->findText("137"));
 	
     ui->portcb->addItem("5001");
 
@@ -91,6 +91,8 @@ MainWindow::MainWindow(QWidget *parent) :
         s.append(QString::number(i));
         ui->factorycb->addItem(s);
     }
+	
+	ui->factorycb->addItem("FC");
 	
 	ui->factorycb->setCurrentIndex(ui->factorycb->findText("M1"));
 
@@ -160,6 +162,8 @@ void MainWindow::getRawImg()
     data = this->camTh->getCapturedRawImg(&size);
 	this->preCapturedMatImg = this->camTh->getCapturedImg();
 	
+	qDebug() << "[ui->net]index : " << this->curIdx << "," << res->getImgIdx(this->curIdx);
+	
     this->netTh->setRawImgData(data, size, res->getImgIdx(this->curIdx));
 
     emit updateRawImgFin();
@@ -207,7 +211,7 @@ void MainWindow::updateResource()
 
 void MainWindow::on_streamingImg_clicked()
 {
-    if (waitForResponse == false)
+    if (waitForResponse == false && ui->tabWidget->currentIndex() == 1)
     {
         this->buzzerTh->playCaptureMelody();
         this->getRawImg();
@@ -322,17 +326,15 @@ void MainWindow::drawImg(bool draw, int x, int y, bool result)
             }
 
             ui->curStep->setText(s);
-			/*
+			
 			if(this->curIdx % D_UI_NUMBER_OF_LOWER_UI_IMGS == 0)
 			{
 				updateLowerUI(this->curIdx);
 			}
 			else
 			{
-				// do not update index
-				updateLowerUI(-1); 
-			}*/
-			updateLowerUI(this->curIdx);
+				updateLowerUI(-1);
+			}
             
 
         }
@@ -347,9 +349,13 @@ void MainWindow::drawImg(bool draw, int x, int y, bool result)
 }
 void MainWindow::updateLowerUI(int indexStart)
 {
-    static int preIndex = 0;
+    static int preIdx = 0;
 	int idx;
     cv::Mat img;
+
+	indexStart = indexStart == -1 ? preIdx : indexStart;
+	
+	this->viewIdx = indexStart;
 	
 	qDebug() << "start" << indexStart;
 	
@@ -376,9 +382,7 @@ void MainWindow::updateLowerUI(int indexStart)
         capturedImg[i]->setIcon(ButtonIcon);
     }
 	
-	preIndex = indexStart;
-	
-	qDebug() << "end" << preIndex;
+	preIdx = indexStart;
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
