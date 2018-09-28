@@ -160,7 +160,8 @@ void MainWindow::getRawImg()
 	uchar * data;
 
     data = this->camTh->getCapturedRawImg(&size);
-	this->preCapturedMatImg = this->camTh->getCapturedImg();
+	this->preCapturedMatImg.release();  // free img data
+    this->preCapturedMatImg = this->camTh->getCapturedImg();
 	
 	qDebug() << "[ui->net]index : " << this->curIdx << "," << res->getImgIdx(this->curIdx);
 	
@@ -294,7 +295,7 @@ void MainWindow::on_rightButton_clicked()
 void MainWindow::drawImg(bool draw, int x, int y, bool result)
 {
     cv::Mat img = this->preCapturedMatImg; //this->camTh->getCapturedImg();
-    cv::cvtColor(img, img, CV_BGR2RGB);
+    // cv::cvtColor(img, img, CV_BGR2RGB);  // already converted at streaming
 
     cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*4/7, D_CAMERA_DISPLAYED_HEIGHT*4/7), 0, 0, CV_INTER_LINEAR);
     ui->preCapturedImg->resize(img.cols, img.rows);

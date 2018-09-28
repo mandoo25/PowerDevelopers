@@ -893,8 +893,18 @@
        </item>
        <item>
         <widget class="QLabel" name="curStep">
+         <property name="font">
+          <font>
+           <family>Piboto</family>
+           <pointsize>12</pointsize>
+           <italic>false</italic>
+          </font>
+         </property>
          <property name="text">
           <string>Barcode</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::AutoText</enum>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>

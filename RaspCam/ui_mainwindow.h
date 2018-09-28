@@ -304,6 +304,12 @@ public:
 
         curStep = new QLabel(horizontalLayoutWidget_2);
         curStep->setObjectName(QStringLiteral("curStep"));
+        QFont font2;
+        font2.setFamily(QStringLiteral("Piboto"));
+        font2.setPointSize(12);
+        font2.setItalic(false);
+        curStep->setFont(font2);
+        curStep->setTextFormat(Qt::AutoText);
         curStep->setAlignment(Qt::AlignCenter);
 
         horizontalLayout_2->addWidget(curStep);
