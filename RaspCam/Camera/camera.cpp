@@ -68,7 +68,7 @@ cv::Mat Camera::getCapturedImg()
     Mat img;
     // oImg.copyTo(cImg5);
     captuerImgMutex.lock();
-    img = this->capturedImg.clone();
+    img = this->capturedImg;
     captuerImgMutex.unlock();
 
     return img;
@@ -82,7 +82,7 @@ uchar * Camera::getCapturedRawImg(int * size)
 	uchar * data;
 	
     captuerImgMutex.lock();
-    image = this->capturedImg;
+    image = this->capturedImg.clone();
 
     std::vector<int> param(2);
 	std::vector<uchar> buff;
@@ -112,7 +112,11 @@ void Camera::enableStreaming(bool enable)
 void Camera::run()
 {
     cv::Mat img;
-
+	
+	cam.grab();
+	cam.retrieve(img);
+	this->updateImg(img);
+	
     while(!this->_exit)
     {
         // qDebug() << "Cam Th";

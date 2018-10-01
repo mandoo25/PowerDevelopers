@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPushButton>
 
 #include "Camera/camera.h"
 #include "Network/network.h"
@@ -28,7 +29,7 @@ public:
 private slots:
     void on_exitButton_clicked();
 
-    void on_captureButton_clicked();
+
 
     void streamImg();
 
@@ -40,27 +41,40 @@ private slots:
 
     void updateResource();
 
+    // external button
     void on_externalButton_pressed();
 
     void on_ResetButton_clicked();
 
     void on_leftButton_clicked();
-
     void on_rightButton_clicked();
 
+    // tab changed
     void on_tabWidget_currentChanged(int index);
 
+    // factory process changed
     void on_factorycb_currentTextChanged(const QString &arg1);
 
+    // ip changed
     void on_ipcb1_currentIndexChanged(const QString &arg1);
-
     void on_ipcb2_currentIndexChanged(const QString &arg1);
-
     void on_ipcb3_currentIndexChanged(const QString &arg1);
-
     void on_ipcb4_currentIndexChanged(const QString &arg1);
 
+    // port changed
     void on_portcb_currentIndexChanged(const QString &arg1);
+
+    // capture!!
+    void on_streamingImg_clicked();
+
+    // lower ui clicked
+    void on_img0_clicked();
+    void on_img1_clicked();
+    void on_img2_clicked();
+    void on_img3_clicked();
+    void on_img4_clicked();
+
+    void on_cellinfocb_currentTextChanged(const QString &arg1);
 
 private:
     Ui::MainWindow *ui;
@@ -69,22 +83,24 @@ private:
     Buzzer * buzzerTh= NULL;
     Key * keyTh = NULL;
 
-    void drawImg(int idx,int x, int y, bool result, bool capture);
+    void drawImg(bool draw, int x, int y, bool result);
 
-    void updateLowerUI();
+    void updateLowerUI(int startIdx);
 
     QPoint m_down;
     QPoint m_up;
 
     Resource * res;
+	cv::Mat preCapturedMatImg;
 
 
     int curIdx;
     int maxIdx;
     int viewIdx;
 
-    Mat img[MAX_CAPURES];
-    int index[MAX_CAPURES];
+    QPushButton * capturedImg[D_UI_NUMBER_OF_LOWER_UI_IMGS];
+    // Mat img[D_UI_NUMBER_OF_LOWER_UI_IMGS];
+    int index[D_UI_NUMBER_OF_LOWER_UI_IMGS];
 
     bool resourceFin;
 
@@ -95,13 +111,16 @@ private:
     void setProcess();
     QString process;
 
+    void setCellInfo();
+    QString cellInfo;
+
     void setPort();
     void setImgMatchRate();
 
 
+    void imgClickEvent(int idx);
 
-
-
+    bool waitForResponse;
 
 signals :
     void updateRawImgFin();

@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     Network/tcp_sock.cpp \
     Hardware/Buzzer/buzzer.cpp \
     Hardware/Key/key.cpp \
-    Resource/resource.cpp
+    Resource/resource.cpp \
+    Network/parsemysql.cpp
 
 HEADERS  += mainwindow.h \
     Camera/camera.h \
@@ -43,12 +44,14 @@ HEADERS  += mainwindow.h \
     Hardware/Buzzer/tones.h \
     Hardware/Buzzer/melody.h \
     Hardware/Key/key.h \
-    Resource/resource.h
+    Resource/resource.h \
+    Network/parsemysql.h
 
 FORMS    += mainwindow.ui
 
 INCLUDEPATH += /usr/local/include
 INCLUDEPATH += /usr/local/include/c++/6.3.0/
+INCLUDEPATH += /usr/include/mysql
 
 LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_tracking -lopencv_videoio -lraspicam_cv -lraspicam -lwiringPi -lwiringPiDev
-
+LIBS += -L/usr/lib/arm-linux-gnueabihf -lmysqlclient

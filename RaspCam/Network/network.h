@@ -47,9 +47,17 @@ public:
     void setProcess(char * proc);
     char * getProcess();
 
+    void setCellInfo(char * proc);
+    char * getCellInfo();
+
     // rate : image match rate
     void setImgRate(int rate);
     int getImgRate(void);
+    Resource * res;
+	
+	
+	bool resetFlag;
+	bool userSettingFlag;
 
 
 private:
@@ -61,6 +69,7 @@ private:
     // user setting
     char ipAddress[16];
     char process[3];
+    char cellInfo[20];
     int port = 8080;
     int imgMatchRate = 60;
     QMutex settingMutex;
@@ -71,8 +80,7 @@ private:
 	int rawDataImgSize;
     int rawDataIndex;
 
-    static Network net_instance;
-    Resource * res;
+    static Network net_instance;    
 	
 	
 

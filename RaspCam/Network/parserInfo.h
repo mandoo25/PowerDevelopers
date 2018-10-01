@@ -11,6 +11,7 @@
 #include <iostream>
 //#include <string>
 #include <cstring>
+#include <list>
 //#include "network.h"
 
 
@@ -18,6 +19,8 @@ using namespace std;
 
 #define D_HEADER_SIZE 11
 #define D_MAX_PROC_SEQ 255
+#define D_MAX_ORD_NUM 10
+#define D_MAX_RESP_NUM 128
 
 typedef int (*callbackFunc)(void *param);
 
@@ -29,7 +32,7 @@ typedef struct transPackinfo {
 	unsigned char process_num;
 	unsigned char accuracy;
 	unsigned char order_size;
-	char          *order_num;
+    char          order_num[D_MAX_RESP_NUM];
 	unsigned int  image_size;
 	char          *image_data;
 
@@ -45,7 +48,7 @@ typedef struct revPackinfo {
 	unsigned int coordinate_y;
 	unsigned char matching_rate;
 	unsigned char data_size;
-    char          data[128];
+    char          data[D_MAX_RESP_NUM];
 
 
 }packInfo_rx;
@@ -82,7 +85,7 @@ typedef enum work_type
 
 typedef enum jobStatus
 {
-	JS_IDLE,
+    JS_IDLE = 0x00,
 	JS_READY,
 	JS_PROCESSING,
 	JS_ERROR,

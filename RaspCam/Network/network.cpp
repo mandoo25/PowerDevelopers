@@ -9,6 +9,7 @@ extern void setNetworkHandler(Network* net);
 extern int transfer_proc_init(void);
 extern int transfer_data_proc(void);
 extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx);
+extern int notifyNumOfProcessSeq(char *PS, unsigned int *cnt);
 
 Network::Network(unsigned int msecPollingPeriod, Resource * res)
 {
@@ -16,6 +17,8 @@ Network::Network(unsigned int msecPollingPeriod, Resource * res)
     this->_exit = false;
 
     this->res = res;
+	this->resetFlag = false;
+	this->userSettingFlag = false;
 	
     // plz write somthing want to initialize
     setNetworkHandler(this);
@@ -41,7 +44,10 @@ void Network::run()
     {
 
         // interrupt : updateRawImg
-        // emit updateRawImg();        
+        // emit updateRawImg();
+        // reset case : flag
+        // user config chagned: flag
+
         transfer_data_proc();
 
         //emit imgProcessFin();
@@ -76,52 +82,20 @@ uchar * Network::getRawImgData(void)
 void Network::sendRawImgData()
 {
     // plz fill out code
-    //packinfo
 
-   //data*
-   qDebug() << this->rawDataImgSize << endl;
+    //qDebug() << this->rawDataImgSize << endl;
 
-   requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, 0); //index will be switched by step .
-
-
-
-#if 0
-   packInfo_tx *pack = (packInfo_tx *)malloc(sizeof(packInfo_tx));
-   //memset(pack, 0, sizeof(packInfo_tx));
-
-   pack->cmd_type = CMD_TYPE_REQUEST; //fixed
-
-   pack->action_type = ACT_BARCODE1D;
-   pack->item_id = WORK_ORDER;
-
-   pack->cell_num = 1;
-   pack->process_num = 1;
-
-   pack->accuracy = 100;
-
-   pack->order_size = 0;
-   //pack.image_size = this->rawDataImg->size();
-   //pack.image_data = (char *)this->rawDataImg;
-   //pack.image_data = reinterpret_cast<char*>(this->rawDataImg->data());
-   pack->image_size = this->rawDataImgSize;
-   pack->image_data = (char*)this->rawDataImg;
-   //qDebug() << "image data handler: "<< pack.image_data <<endl;
-   //printf("?????: %d\n", this->rawDataImg);
-   printf("image size : %d\n", pack->image_size);
-   
-   printf("%p\n", pack);
-   buildPacket(pack);
-#endif
-
-
+   int idx =this->rawDataIndex;
+   requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, idx); //index will be switched by step .
 }
 
 void Network::setIpResults(int x, int y, bool res)
 {
+
     printf("network::setIpResults\n");
     this->ipResult.x = x;
     this->ipResult.y = y;
-    this->ipResult.result = res;
+    this->ipResult.result = res;  
 }
 
 
@@ -129,17 +103,16 @@ void Network::setServerIpAddress(char * ip)
 {
     // 192.168.000.001 = 3*4 + 3 = 12 + 3 = 15 + 1(NULL)
     if(strlen(ip) > 15) return;
-    this->settingMutex.lock();
+    this->settingMutex.lock();    
     strcpy(this->ipAddress,ip);
     this->settingMutex.unlock();
 }
 
-char * Network::getServerIpAddress()
+char * Network::getServerIpAddress()  //////////
 {
     // wait
     this->settingMutex.lock();
     this->settingMutex.unlock();
-
     return this->ipAddress;
 }
 
@@ -151,7 +124,7 @@ void Network::setPort(int port)
     this->settingMutex.unlock();
 }
 
-int Network::getPort()
+int Network::getPort()   /////////
 {
     // wait
     this->settingMutex.lock();
@@ -170,13 +143,32 @@ void Network::setProcess(char * proc)
     this->settingMutex.unlock();
 }
 
-char * Network::getProcess()
+char * Network::getProcess() ///////
 {
     // wait
     this->settingMutex.lock();
     this->settingMutex.unlock();
 
     return this->process;
+}
+
+
+void Network::setCellInfo(char * info)
+{
+    // process m1, m2 ...   
+	if(strlen(info) >= 20) return;	
+    this->settingMutex.lock();
+    strcpy(this->cellInfo,info);
+    this->settingMutex.unlock();
+}
+
+char * Network::getCellInfo() ///////
+{
+    // wait
+    this->settingMutex.lock();
+    this->settingMutex.unlock();
+
+    return this->cellInfo;
 }
 
 // rate : image match rate
@@ -187,7 +179,7 @@ void Network::setImgRate(int rate)
     this->settingMutex.unlock();
 }
 
-int Network::getImgRate(void)
+int Network::getImgRate(void) ////////
 {
     // wait
     this->settingMutex.lock();

@@ -279,14 +279,63 @@
        </rect>
       </property>
       <property name="title">
-       <string>Factory Process</string>
+       <string>Factory</string>
       </property>
       <widget class="QComboBox" name="factorycb">
        <property name="geometry">
         <rect>
          <x>10</x>
          <y>40</y>
-         <width>171</width>
+         <width>141</width>
+         <height>21</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="exitButton">
+       <property name="geometry">
+        <rect>
+         <x>370</x>
+         <y>40</y>
+         <width>85</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Exit</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>20</y>
+         <width>67</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cell Info</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>67</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Process Info</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="cellinfocb">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>40</y>
+         <width>141</width>
          <height>21</height>
         </rect>
        </property>
@@ -724,14 +773,14 @@
       <property name="geometry">
        <rect>
         <x>310</x>
-        <y>20</y>
+        <y>10</y>
         <width>171</width>
         <height>121</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QLabel" name="capturedImg1">
+        <widget class="QLabel" name="preCapturedImg">
          <property name="text">
           <string/>
          </property>
@@ -739,55 +788,79 @@
        </item>
       </layout>
      </widget>
-     <widget class="QLabel" name="realtimeImg">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>251</width>
-        <height>191</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
      <widget class="QWidget" name="horizontalLayoutWidget">
       <property name="geometry">
        <rect>
         <x>60</x>
-        <y>220</y>
-        <width>271</width>
+        <y>210</y>
+        <width>371</width>
         <height>66</height>
        </rect>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="capturedImgLayout">
        <property name="spacing">
         <number>15</number>
        </property>
        <item>
-        <widget class="QLabel" name="capturedImg2">
+        <widget class="QPushButton" name="img0">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string/>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="capturedImg3">
+        <widget class="QPushButton" name="img1">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string/>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="capturedImg4">
+        <widget class="QPushButton" name="img2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string/>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="capturedImg5">
+        <widget class="QPushButton" name="img3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="img4">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -799,7 +872,7 @@
       <property name="geometry">
        <rect>
         <x>310</x>
-        <y>140</y>
+        <y>130</y>
         <width>171</width>
         <height>80</height>
        </rect>
@@ -820,8 +893,18 @@
        </item>
        <item>
         <widget class="QLabel" name="curStep">
+         <property name="font">
+          <font>
+           <family>Piboto</family>
+           <pointsize>12</pointsize>
+           <italic>false</italic>
+          </font>
+         </property>
          <property name="text">
           <string>Barcode</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::AutoText</enum>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -834,7 +917,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>220</y>
+        <y>210</y>
         <width>41</width>
         <height>64</height>
        </rect>
@@ -858,8 +941,8 @@
      <widget class="QPushButton" name="rightButton">
       <property name="geometry">
        <rect>
-        <x>340</x>
-        <y>220</y>
+        <x>440</x>
+        <y>210</y>
         <width>41</width>
         <height>64</height>
        </rect>
@@ -874,40 +957,18 @@
        <string>▶</string>
       </property>
      </widget>
-     <widget class="QWidget" name="verticalLayoutWidget_2">
+     <widget class="QPushButton" name="streamingImg">
       <property name="geometry">
        <rect>
-        <x>390</x>
-        <y>220</y>
-        <width>87</width>
-        <height>64</height>
+        <x>10</x>
+        <y>10</y>
+        <width>291</width>
+        <height>181</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QPushButton" name="captureButton">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="text">
-          <string>Capture</string>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>24</width>
-           <height>24</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="exitButton">
-         <property name="text">
-          <string>Exit</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <property name="text">
+       <string/>
+      </property>
      </widget>
     </widget>
    </widget>
